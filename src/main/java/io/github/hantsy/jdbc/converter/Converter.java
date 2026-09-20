@@ -1,0 +1,6 @@
+package io.github.hantsy.jdbc.converter;
+
+@FunctionalInterface
+public interface Converter<S, T> {
+    T convert(S source);
+}

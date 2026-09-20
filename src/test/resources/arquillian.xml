@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<arquillian
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns="http://jboss.org/schema/arquillian"
+        xsi:schemaLocation="http://jboss.org/schema/arquillian https://jboss.org/schema/arquillian/arquillian_1_0.xsd">
+    <defaultProtocol type="Servlet 6.0"/>
+    
+    <container qualifier="glassfish-managed" default="true">
+        <configuration>
+            <!-- Auto-configured dynamically via the maven failsafe target hook -->
+            <property name="glassfishHome">${glassfishHome}</property>
+        </configuration>
+    </container>
+</arquillian>
