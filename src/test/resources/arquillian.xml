@@ -8,7 +8,7 @@
     <container qualifier="glassfish-managed" default="true">
         <configuration>
             <!-- Auto-configured dynamically via the maven failsafe target hook -->
-            <property name="glassfishHome">${glassfishHome}</property>
+            <property name="glassFishHome">${glassfishHome}</property>
         </configuration>
     </container>
 </arquillian>

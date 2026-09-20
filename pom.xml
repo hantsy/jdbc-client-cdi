@@ -159,10 +159,10 @@
                 <version>${maven-failsafe-plugin.version}</version>
                 <configuration>
                     <environmentVariables>
-                        <GLASSFISH_HOME>${project.build.directory}/glassfish8/glassfish</GLASSFISH_HOME>
+                        <GLASSFISH_HOME>${project.build.directory}/glassfish8</GLASSFISH_HOME>
                     </environmentVariables>
                     <systemPropertyVariables>
-                        <glassfishHome>${project.build.directory}/glassfish8/glassfish</glassfishHome>
+                        <glassfishHome>${project.build.directory}/glassfish8</glassfishHome>
                     </systemPropertyVariables>
                 </configuration>
                 <executions>
