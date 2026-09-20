@@ -18,7 +18,7 @@
 
         <!-- Jakarta EE and MicroProfile -->
         <jakartaee-api.version>11.0.0</jakartaee-api.version>
-        <microprofile.version>7.0</microprofile.version>
+        <microprofile.version>7.1</microprofile.version>
 
         <!-- Test Dependencies -->
         <arquillian-bom.version>1.10.2.Final</arquillian-bom.version>
