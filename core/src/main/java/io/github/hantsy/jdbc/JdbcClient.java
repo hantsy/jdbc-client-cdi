@@ -16,6 +16,31 @@ import java.util.regex.Pattern;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
+/**
+ * Fluent JDBC client for executing parameterized SQL against a {@link DataSource}.
+ *
+ * <p>Create a client, build a statement, bind parameters, and choose a terminal
+ * operation:</p>
+ *
+ * <pre>{@code
+ * List<Engineer> engineers = client
+ *         .sql("SELECT id, dev_name FROM engineers ORDER BY id")
+ *         .query(Engineer.class)
+ *         .list();
+ *
+ * int updated = client
+ *         .sql("UPDATE engineers SET dev_name = :name WHERE id = :id")
+ *         .params(Map.of("name", "New Name", "id", 1L))
+ *         .update();
+ * }</pre>
+ *
+ * <p>Use {@link RowMapper} with {@link SqlSpec#query(RowMapper)} for custom
+ * mapping. Use {@link #builder(DataSource)} to configure placeholders,
+ * timeouts, fetch sizes, and converters.</p>
+ *
+ * @see RowMapper
+ * @see JdbcConfig
+ */
 public class JdbcClient {
 
     private DataSource dataSource;
@@ -49,22 +74,27 @@ public class JdbcClient {
     }
 
 
+    /** Sets the data source used by subsequent operations. */
     public void setDataSource(DataSource dataSource) {
         this.dataSource = dataSource;
     }
 
+    /** Sets the registry used for reflective result conversion. */
     public void setConverterRegistry(ConverterRegistry converterRegistry) {
         this.converterRegistry = converterRegistry;
     }
 
+    /** Sets the default statement configuration. */
     public void setConfig(JdbcConfig config) {
         this.config = config;
     }
 
+    /** Starts building a client for the supplied data source. */
     public static Builder builder(DataSource dataSource) {
         return new Builder(dataSource);
     }
 
+    /** Fluent builder for configuring a {@link JdbcClient}. */
     public static class Builder {
         private final DataSource dataSource;
         private ConverterRegistry converters = new ConverterRegistry();
@@ -76,26 +106,31 @@ public class JdbcClient {
             this.dataSource = dataSource;
         }
 
+        /** Sets the placeholder style used when named parameters are rewritten. */
         public Builder placeholder(String placeholder) {
             this.placeholder = Objects.requireNonNull(placeholder, "placeholder must not be null");
             return this;
         }
 
+        /** Sets the default prepared-statement timeout in seconds. */
         public Builder queryTimeout(int queryTimeout) {
             this.queryTimeout = queryTimeout;
             return this;
         }
 
+        /** Sets the default JDBC fetch-size hint. */
         public Builder fetchSize(int fetchSize) {
             this.fetchSize = fetchSize;
             return this;
         }
 
+        /** Sets the converter registry used by reflective mapping. */
         public Builder converters(ConverterRegistry converters) {
             this.converters = Objects.requireNonNull(converters, "converters must not be null");
             return this;
         }
 
+        /** Copies settings from a {@link JdbcConfig}. */
         public Builder config(JdbcConfig config) {
             Objects.requireNonNull(config, "config must not be null");
             this.placeholder = config.placeholder();
@@ -104,16 +139,24 @@ public class JdbcClient {
             return this;
         }
 
+        /** Builds the configured client. */
         public JdbcClient build() {
             return new JdbcClient(dataSource, converters,
                     new JdbcConfig(placeholder, queryTimeout, fetchSize));
         }
     }
 
+    /**
+     * Starts a fluent operation for an SQL statement.
+     *
+     * @param sql SQL containing optional {@code :name} parameters
+     * @return a statement specification
+     */
     public SqlSpec sql(String sql) {
         return new SqlSpec(sql);
     }
 
+    /** Represents an SQL statement, its parameters, and statement options. */
     public class SqlSpec {
         private final String rawSql;
         private final Map<String, Object> namedParams = new HashMap<>();
@@ -121,20 +164,45 @@ public class JdbcClient {
         private Integer fetchSize;
         private Integer queryTimeout;
 
+        /**
+         * Creates a statement specification.
+         *
+         * @param sql SQL to execute
+         */
         public SqlSpec(String sql) {
             this.rawSql = sql;
         }
 
+        /**
+         * Overrides the client's fetch-size setting for this statement.
+         *
+         * @param fetchSize JDBC fetch-size hint
+         * @return this statement
+         */
         public SqlSpec fetchSize(int fetchSize) {
             this.fetchSize = fetchSize;
             return this;
         }
 
+        /**
+         * Overrides the client's query-timeout setting for this statement.
+         *
+         * @param queryTimeout timeout in seconds
+         * @return this statement
+         */
         public SqlSpec queryTimeout(int queryTimeout) {
             this.queryTimeout = queryTimeout;
             return this;
         }
 
+        /**
+         * Adds one named parameter matching a {@code :name} placeholder.
+         *
+         * @param name parameter name
+         * @param value parameter value
+         * @return this statement
+         * @throws IllegalArgumentException if positional parameters were already added
+         */
         public SqlSpec param(String name, Object value) {
             if (!positionalParams.isEmpty()) {
                 throw new IllegalArgumentException("Cannot mix named and positional parameters");
@@ -143,6 +211,13 @@ public class JdbcClient {
             return this;
         }
 
+        /**
+         * Adds one positional parameter in placeholder order.
+         *
+         * @param value parameter value
+         * @return this statement
+         * @throws IllegalArgumentException if named parameters were already added
+         */
         public SqlSpec param(Object value) {
             if (!namedParams.isEmpty()) {
                 throw new IllegalArgumentException("Cannot mix named and positional parameters");
@@ -151,6 +226,13 @@ public class JdbcClient {
             return this;
         }
 
+        /**
+         * Adds all named parameters from a map.
+         *
+         * @param values parameter names and values
+         * @return this statement
+         * @throws IllegalArgumentException if positional parameters were already added
+         */
         public SqlSpec params(Map<String, ?> values) {
             if (!positionalParams.isEmpty()) {
                 throw new IllegalArgumentException("Cannot mix named and positional parameters");
@@ -159,6 +241,13 @@ public class JdbcClient {
             return this;
         }
 
+        /**
+         * Adds positional parameters in placeholder order.
+         *
+         * @param values parameter values
+         * @return this statement
+         * @throws IllegalArgumentException if named parameters were already added
+         */
         public SqlSpec params(Object... values) {
             if (!namedParams.isEmpty()) {
                 throw new IllegalArgumentException("Cannot mix named and positional parameters");
@@ -167,6 +256,13 @@ public class JdbcClient {
             return this;
         }
 
+        /**
+         * Adds positional parameters from a list in placeholder order.
+         *
+         * @param values parameter values
+         * @return this statement
+         * @throws IllegalArgumentException if named parameters were already added
+         */
         public SqlSpec params(List<?> values) {
             if (!namedParams.isEmpty()) {
                 throw new IllegalArgumentException("Cannot mix named and positional parameters");
@@ -175,19 +271,55 @@ public class JdbcClient {
             return this;
         }
 
+        /**
+         * Queries rows and maps them to a record, POJO, or scalar type.
+         *
+         * @param clazz target mapping type
+         * @param <T> result type
+         * @return a query specification
+         */
         public <T> QuerySpec<T> query(Class<T> clazz) {
             return new QuerySpec<>(new TypedRowMapper<>(clazz));
         }
 
+        /**
+         * Queries rows using an application-provided mapper.
+         *
+         * <pre>{@code
+         * List<String> names = client
+         *         .sql("SELECT dev_name FROM engineers ORDER BY id")
+         *         .query((rs, rowNum) -> rs.getString("dev_name"))
+         *         .list();
+         * }</pre>
+         *
+         * @param rowMapper mapper for each current result-set row
+         * @param <T> result type
+         * @return a query specification
+         */
         public <T> QuerySpec<T> query(RowMapper<T> rowMapper) {
             return new QuerySpec<>(rowMapper);
         }
 
+        /**
+         * Reads exactly one scalar value from the first column of one row.
+         *
+         * @param clazz scalar target type
+         * @param <T> scalar type
+         * @return the scalar value
+         * @throws IncorrectResultSizeException if no row exists
+         */
         public <T> T singleValue(Class<T> clazz) {
             return optionalValue(clazz)
                     .orElseThrow(() -> new IncorrectResultSizeException("Expected a single value but got none", 1, 0));
         }
 
+        /**
+         * Reads at most one scalar value from the first column.
+         *
+         * @param clazz scalar target type
+         * @param <T> scalar type
+         * @return the value, or empty when no row exists
+         */
         public <T> Optional<T> optionalValue(Class<T> clazz) {
             ParsedSql parsed = parseSql(rawSql);
             TypedRowMapper<T> mapper = new TypedRowMapper<>(clazz);
@@ -199,10 +331,28 @@ public class JdbcClient {
             });
         }
 
+        /**
+         * Executes an update without collecting generated keys.
+         *
+         * @return the number of affected rows
+         */
         public int update() {
             return doUpdate(null);
         }
 
+        /**
+         * Executes an update and stores returned generated keys in a holder.
+         *
+         * <pre>{@code
+         * KeyHolder keys = new GeneratedKeyHolder();
+         * client.sql("INSERT INTO engineers (dev_name) VALUES (:name)")
+         *         .param("name", "New Dev")
+         *         .update(keys);
+         * }</pre>
+         *
+         * @param keyHolder holder receiving generated-key rows
+         * @return the number of affected rows
+         */
         public int update(KeyHolder keyHolder) {
             Objects.requireNonNull(keyHolder, "keyHolder must not be null");
             return doUpdate(keyHolder);
@@ -227,6 +377,12 @@ public class JdbcClient {
             });
         }
 
+        /**
+         * Executes a batch update using named parameters.
+         *
+         * @param batchArgs one map of named values per batch entry
+         * @return update counts returned by JDBC
+         */
         public int[] batchUpdate(List<Map<String, Object>> batchArgs) {
             ParsedSql parsed = parseSql(rawSql);
             return execute(() -> {
@@ -244,6 +400,12 @@ public class JdbcClient {
             });
         }
 
+        /**
+         * Executes a batch update using positional parameters.
+         *
+         * @param batchArgs one positional value array per batch entry
+         * @return update counts returned by JDBC
+         */
         public int[] batchUpdate(Object[][] batchArgs) {
             ParsedSql parsed = parseSql(rawSql);
             return execute(() -> {
@@ -261,13 +423,24 @@ public class JdbcClient {
             });
         }
 
+        /**
+         * Provides terminal operations for a mapped query.
+         *
+         * @param <T> mapped result type
+         */
         public class QuerySpec<T> {
             private final RowMapper<T> rowMapper;
 
+            /**
+             * Creates a query specification using the supplied mapper.
+             *
+             * @param rowMapper mapper for each result-set row
+             */
             public QuerySpec(RowMapper<T> rowMapper) {
                 this.rowMapper = rowMapper;
             }
 
+            /** Returns every mapped row as a list. */
             public List<T> list() {
                 ParsedSql parsed = parseSql(rawSql);
                 return executeQuery(parsed, rs -> {
@@ -280,6 +453,11 @@ public class JdbcClient {
                 });
             }
 
+            /**
+             * Returns exactly one mapped row.
+             *
+             * @throws IncorrectResultSizeException if zero or multiple rows exist
+             */
             public T single() {
                 ParsedSql parsed = parseSql(rawSql);
                 return executeQuery(parsed, rs -> {
@@ -294,6 +472,11 @@ public class JdbcClient {
                 });
             }
 
+            /**
+             * Returns zero or one mapped row.
+             *
+             * @throws IncorrectResultSizeException if multiple rows exist
+             */
             public Optional<T> optional() {
                 ParsedSql parsed = parseSql(rawSql);
                 return executeQuery(parsed, rs -> {
@@ -308,6 +491,14 @@ public class JdbcClient {
                 });
             }
 
+            /**
+             * Streams mapped rows.
+             *
+             * <p>Close the returned stream to release its JDBC resources,
+             * preferably with try-with-resources.</p>
+             *
+             * @return a sequential stream of mapped rows
+             */
             public Stream<T> stream() {
                 ParsedSql parsed = parseSql(rawSql);
                 Connection conn = null;
@@ -517,33 +708,16 @@ public class JdbcClient {
             }
 
             if (value instanceof Number num) {
-                if (targetType == Long.class || targetType == long.class) return num.longValue();
-                if (targetType == Integer.class || targetType == int.class) return num.intValue();
-                if (targetType == Short.class || targetType == short.class) return num.shortValue();
-                if (targetType == Byte.class || targetType == byte.class) return num.byteValue();
-                if (targetType == Double.class || targetType == double.class) return num.doubleValue();
-                if (targetType == Float.class || targetType == float.class) return num.floatValue();
-                if (targetType == java.math.BigDecimal.class) return new java.math.BigDecimal(num.toString());
-                if (targetType == java.math.BigInteger.class) return java.math.BigInteger.valueOf(num.longValue());
-                if (targetType == String.class) return num.toString();
-                if (targetType == Boolean.class || targetType == boolean.class) return num.intValue() != 0;
+                return convertNumber(num, targetType);
             }
-
             if (targetType == String.class) {
                 return value.toString();
             }
-
             if (targetType == Boolean.class || targetType == boolean.class) {
-                if (value instanceof String s) return Boolean.parseBoolean(s);
-                if (value instanceof Boolean b) return b;
+                return convertBoolean(value);
             }
-
             if (value instanceof java.sql.Timestamp ts) {
-                if (targetType == java.time.LocalDateTime.class) return ts.toLocalDateTime();
-                if (targetType == java.time.LocalDate.class) return ts.toLocalDateTime().toLocalDate();
-                if (targetType == java.time.Instant.class) return ts.toInstant();
-                if (targetType == java.time.OffsetDateTime.class)
-                    return ts.toInstant().atOffset(java.time.ZoneOffset.UTC);
+                return convertTimestamp(ts, targetType);
             }
             if (value instanceof java.sql.Date d && targetType == java.time.LocalDate.class) {
                 return d.toLocalDate();
@@ -554,14 +728,69 @@ public class JdbcClient {
 
             return value;
         }
+
+        private Object convertNumber(Number num, Class<?> targetType) {
+            if (targetType == Long.class || targetType == long.class) {
+                return num.longValue();
+            }
+            if (targetType == Integer.class || targetType == int.class) {
+                return num.intValue();
+            }
+            if (targetType == Short.class || targetType == short.class) {
+                return num.shortValue();
+            }
+            if (targetType == Byte.class || targetType == byte.class) {
+                return num.byteValue();
+            }
+            if (targetType == Double.class || targetType == double.class) {
+                return num.doubleValue();
+            }
+            if (targetType == Float.class || targetType == float.class) {
+                return num.floatValue();
+            }
+            if (targetType == java.math.BigDecimal.class) {
+                return new java.math.BigDecimal(num.toString());
+            }
+            if (targetType == java.math.BigInteger.class) {
+                return java.math.BigInteger.valueOf(num.longValue());
+            }
+            if (targetType == String.class) {
+                return num.toString();
+            }
+            if (targetType == Boolean.class || targetType == boolean.class) {
+                return num.intValue() != 0;
+            }
+            return num;
+        }
+
+        private Object convertBoolean(Object value) {
+            if (value instanceof String s) {
+                return Boolean.parseBoolean(s);
+            }
+            if (value instanceof Boolean b) {
+                return b;
+            }
+            return value;
+        }
+
+        private Object convertTimestamp(java.sql.Timestamp ts, Class<?> targetType) {
+            if (targetType == java.time.LocalDateTime.class) {
+                return ts.toLocalDateTime();
+            }
+            if (targetType == java.time.LocalDate.class) {
+                return ts.toLocalDateTime().toLocalDate();
+            }
+            if (targetType == java.time.Instant.class) {
+                return ts.toInstant();
+            }
+            if (targetType == java.time.OffsetDateTime.class) {
+                return ts.toInstant().atOffset(java.time.ZoneOffset.UTC);
+            }
+            return ts;
+        }
     }
 
     private record ParsedSql(String jdbcSql, List<String> orderedParamNames) {
-    }
-
-    @FunctionalInterface
-    public interface RowMapper<T> {
-        T mapRow(ResultSet rs, int rowNum) throws SQLException;
     }
 
     @FunctionalInterface

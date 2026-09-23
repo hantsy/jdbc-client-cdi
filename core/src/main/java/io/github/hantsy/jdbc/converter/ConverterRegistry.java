@@ -1,6 +1,5 @@
 package io.github.hantsy.jdbc.converter;
 
-import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;

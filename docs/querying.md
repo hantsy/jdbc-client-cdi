@@ -63,7 +63,7 @@ List<String> names = client
         .query((rs, rowNum) -> rs.getString("dev_name"))
         .list();
 
-JdbcClient.RowMapper<DevSummary> mapper = (rs, rowNum) ->
+RowMapper<DevSummary> mapper = (rs, rowNum) ->
         new DevSummary(rs.getLong("id"), rs.getString("dev_name"));
 
 List<DevSummary> devs = client
