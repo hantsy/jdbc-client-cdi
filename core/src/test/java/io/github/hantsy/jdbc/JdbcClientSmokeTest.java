@@ -122,6 +122,40 @@ public class JdbcClientSmokeTest {
     }
 
     @Test
+    public void explicitRowMapper() {
+        RowMapper<DevSummary> rowMapper =
+                (rs, rowNum) -> new DevSummary(rs.getLong("id"), rs.getString("dev_name"));
+
+        List<DevSummary> summaries = jdbcClient.sql("SELECT id, dev_name FROM engineers ORDER BY id")
+                .query(rowMapper).list();
+
+        Assertions.assertEquals(List.of(
+                new DevSummary(1L, "Duke Jakarta"),
+                new DevSummary(2L, "Arquillian Glassfish")), summaries);
+    }
+
+    @Test
+    public void listMapsToPojo() {
+        List<DevSummaryPojo> all = jdbcClient.sql("SELECT id, dev_name FROM engineers ORDER BY id")
+                .query(DevSummaryPojo.class).list();
+
+        Assertions.assertEquals(2, all.size());
+        Assertions.assertEquals(1L, all.get(0).getId());
+        Assertions.assertEquals("Duke Jakarta", all.get(0).getDevName());
+        Assertions.assertEquals(2L, all.get(1).getId());
+        Assertions.assertEquals("Arquillian Glassfish", all.get(1).getDevName());
+    }
+
+    @Test
+    public void singleMapsToPojo() {
+        DevSummaryPojo summary = jdbcClient.sql("SELECT id, dev_name FROM engineers WHERE id = :id")
+                .param("id", 2L).query(DevSummaryPojo.class).single();
+
+        Assertions.assertEquals(2L, summary.getId());
+        Assertions.assertEquals("Arquillian Glassfish", summary.getDevName());
+    }
+
+    @Test
     public void stream() {
         List<DevSummary> all = jdbcClient.sql("SELECT id, dev_name FROM engineers ORDER BY id")
                 .query(DevSummary.class).stream().toList();
