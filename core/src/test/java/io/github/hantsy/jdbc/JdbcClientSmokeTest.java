@@ -70,14 +70,15 @@ public class JdbcClientSmokeTest {
 
     @Test
     public void singleThrowsWhenEmpty() {
-        Assertions.assertThrows(IncorrectResultSizeException.class, () ->
+        JdbcClientException exception = Assertions.assertThrows(JdbcClientException.class, () ->
                 jdbcClient.sql("SELECT id, dev_name FROM engineers WHERE id = :id")
                         .param("id", 999L).query(DevSummary.class).single());
+        Assertions.assertEquals(JdbcClientException.Code.NO_RESULT, exception.getCode());
     }
 
     @Test
     public void singleThrowsWhenMany() {
-        Assertions.assertThrows(IncorrectResultSizeException.class, () ->
+        Assertions.assertThrows(JdbcClientException.class, () ->
                 jdbcClient.sql("SELECT id, dev_name FROM engineers").query(DevSummary.class).single());
     }
 
@@ -100,7 +101,7 @@ public class JdbcClientSmokeTest {
 
     @Test
     public void singleValueThrowsWhenEmpty() {
-        Assertions.assertThrows(IncorrectResultSizeException.class, () ->
+        Assertions.assertThrows(JdbcClientException.class, () ->
                 jdbcClient.sql("SELECT id FROM engineers WHERE id = 999").singleValue(Long.class));
     }
 
@@ -132,6 +133,19 @@ public class JdbcClientSmokeTest {
         Assertions.assertEquals(List.of(
                 new DevSummary(1L, "Duke Jakarta"),
                 new DevSummary(2L, "Arquillian Glassfish")), summaries);
+    }
+
+    @Test
+    public void mapperFailureIsCategorized() {
+        JdbcClientException exception = Assertions.assertThrows(JdbcClientException.class, () ->
+                jdbcClient.sql("SELECT id FROM engineers")
+                        .query((rs, rowNum) -> {
+                            throw new java.sql.SQLException("mapping failed");
+                        })
+                        .list());
+
+        Assertions.assertEquals(JdbcClientException.Code.MAPPING_FAILURE, exception.getCode());
+        Assertions.assertInstanceOf(java.sql.SQLException.class, exception.getCause());
     }
 
     @Test

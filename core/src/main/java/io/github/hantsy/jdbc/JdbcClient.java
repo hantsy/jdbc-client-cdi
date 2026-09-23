@@ -38,6 +38,10 @@ import java.util.stream.StreamSupport;
  * mapping. Use {@link #builder(DataSource)} to configure placeholders,
  * timeouts, fetch sizes, and converters.</p>
  *
+ * <p>Execution and mapping failures are reported as
+ * {@link JdbcClientException}. Inspect {@link JdbcClientException#getCode()}
+ * to distinguish JDBC, mapping, converter, empty-result, and cardinality failures.</p>
+ *
  * @see RowMapper
  * @see JdbcConfig
  */
@@ -306,11 +310,14 @@ public class JdbcClient {
          * @param clazz scalar target type
          * @param <T> scalar type
          * @return the scalar value
-         * @throws IncorrectResultSizeException if no row exists
+         * @throws JdbcClientException with {@link JdbcClientException.Code#NO_RESULT}
+         *         if no row exists
          */
         public <T> T singleValue(Class<T> clazz) {
             return optionalValue(clazz)
-                    .orElseThrow(() -> new IncorrectResultSizeException("Expected a single value but got none", 1, 0));
+                    .orElseThrow(() -> new JdbcClientException(
+                            JdbcClientException.Code.NO_RESULT,
+                            "Expected a single value but got none"));
         }
 
         /**
@@ -322,7 +329,7 @@ public class JdbcClient {
          */
         public <T> Optional<T> optionalValue(Class<T> clazz) {
             ParsedSql parsed = parseSql(rawSql);
-            TypedRowMapper<T> mapper = new TypedRowMapper<>(clazz);
+            RowMapper<T> mapper = decorateMapper(new TypedRowMapper<>(clazz));
             return executeQuery(parsed, rs -> {
                 if (!rs.next()) {
                     return Optional.<T>empty();
@@ -437,7 +444,7 @@ public class JdbcClient {
              * @param rowMapper mapper for each result-set row
              */
             public QuerySpec(RowMapper<T> rowMapper) {
-                this.rowMapper = rowMapper;
+                this.rowMapper = decorateMapper(rowMapper);
             }
 
             /** Returns every mapped row as a list. */
@@ -456,17 +463,22 @@ public class JdbcClient {
             /**
              * Returns exactly one mapped row.
              *
-             * @throws IncorrectResultSizeException if zero or multiple rows exist
+             * @throws JdbcClientException with {@link JdbcClientException.Code#NO_RESULT}
+             *         if zero or multiple rows exist
              */
             public T single() {
                 ParsedSql parsed = parseSql(rawSql);
                 return executeQuery(parsed, rs -> {
                     if (!rs.next()) {
-                        throw new IncorrectResultSizeException("Expected exactly 1 row but got 0", 1, 0);
+                        throw new JdbcClientException(
+                                JdbcClientException.Code.NO_RESULT,
+                                "Expected exactly 1 row but got 0");
                     }
                     T result = rowMapper.mapRow(rs, 0);
                     if (rs.next()) {
-                        throw new IncorrectResultSizeException("Expected exactly 1 row but got more than 1", 1, -1);
+                        throw new JdbcClientException(
+                                JdbcClientException.Code.TOO_MANY_RESULTS,
+                                "Expected exactly 1 row but got more than 1");
                     }
                     return result;
                 });
@@ -475,7 +487,8 @@ public class JdbcClient {
             /**
              * Returns zero or one mapped row.
              *
-             * @throws IncorrectResultSizeException if multiple rows exist
+             * @throws JdbcClientException with {@link JdbcClientException.Code#TOO_MANY_RESULTS}
+             *         if multiple rows exist
              */
             public Optional<T> optional() {
                 ParsedSql parsed = parseSql(rawSql);
@@ -485,7 +498,9 @@ public class JdbcClient {
                     }
                     T result = rowMapper.mapRow(rs, 0);
                     if (rs.next()) {
-                        throw new IncorrectResultSizeException("Expected at most 1 row but got more than 1", 1, -1);
+                        throw new JdbcClientException(
+                                JdbcClientException.Code.TOO_MANY_RESULTS,
+                                "Expected at most 1 row but got more than 1");
                     }
                     return Optional.of(result);
                 });
@@ -518,7 +533,7 @@ public class JdbcClient {
                     return StreamSupport.stream(new ResultSetSpliterator<>(r, rowMapper), false)
                             .onClose(() -> closeQuietly(r, s, c));
                 } catch (SQLException e) {
-                    throw new DataAccessException(e.getMessage(), e);
+                throw new JdbcClientException(JdbcClientException.Code.JDBC, e.getMessage(), e);
                 } finally {
                     if (!opened) {
                         closeQuietly(rs, ps, conn);
@@ -531,7 +546,7 @@ public class JdbcClient {
             try {
                 return executor.execute();
             } catch (SQLException e) {
-                throw new DataAccessException(e.getMessage(), e);
+                throw new JdbcClientException(JdbcClientException.Code.JDBC, e.getMessage(), e);
             }
         }
 
@@ -625,9 +640,32 @@ public class JdbcClient {
     }
 
     /**
-     * Maps a {@link ResultSet} row to a typed object — a record, a POJO, or a single scalar value —
-     * using reflection and the registered {@link Converter}s.
+     * Decorates a row mapper so mapping failures use the client's exception contract.
+     *
+     * <p>Existing {@link JdbcClientException} instances are propagated unchanged.
+     * Checked SQL exceptions and other runtime failures from the original mapper
+     * are wrapped as {@link JdbcClientException.Code#MAPPING_FAILURE} while
+     * preserving the original cause.</p>
+     *
+     * @param mapper the original row mapper
+     * @param <T> mapped result type
+     * @return a mapper that translates failures from the original mapper
      */
+    private static <T> RowMapper<T> decorateMapper(RowMapper<T> mapper) {
+        return (rs, rowNum) -> {
+            try {
+                return mapper.mapRow(rs, rowNum);
+            } catch (JdbcClientException e) {
+                throw e;
+            } catch (SQLException | RuntimeException e) {
+                throw new JdbcClientException(
+                        JdbcClientException.Code.MAPPING_FAILURE,
+                        "Failed to map result row " + rowNum,
+                        e);
+            }
+        };
+    }
+
     private class TypedRowMapper<T> implements RowMapper<T> {
 
         private static final Set<Class<?>> SIMPLE_TYPES = Set.of(
@@ -822,7 +860,7 @@ public class JdbcClient {
                 }
                 return false;
             } catch (SQLException e) {
-                throw new DataAccessException(e.getMessage(), e);
+                throw new JdbcClientException(JdbcClientException.Code.JDBC, e.getMessage(), e);
             }
         }
 

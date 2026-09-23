@@ -90,7 +90,7 @@ public class JdbcClientIT {
 
     @Test
     public void singleThrowsWhenEmpty() {
-        Assertions.assertThrows(IncorrectResultSizeException.class, () ->
+        Assertions.assertThrows(JdbcClientException.class, () ->
                 jdbcClient.sql("SELECT id, dev_name FROM engineers WHERE id = :id")
                         .param("id", 999L)
                         .query(DevSummary.class)
@@ -99,7 +99,7 @@ public class JdbcClientIT {
 
     @Test
     public void singleThrowsWhenMultipleRows() {
-        Assertions.assertThrows(IncorrectResultSizeException.class, () ->
+        Assertions.assertThrows(JdbcClientException.class, () ->
                 jdbcClient.sql("SELECT id, dev_name FROM engineers")
                         .query(DevSummary.class)
                         .single());
@@ -126,7 +126,7 @@ public class JdbcClientIT {
 
     @Test
     public void optionalThrowsWhenMultipleRows() {
-        Assertions.assertThrows(IncorrectResultSizeException.class, () ->
+        Assertions.assertThrows(JdbcClientException.class, () ->
                 jdbcClient.sql("SELECT id, dev_name FROM engineers")
                         .query(DevSummary.class)
                         .optional());
@@ -141,7 +141,7 @@ public class JdbcClientIT {
 
     @Test
     public void singleValueThrowsWhenEmpty() {
-        Assertions.assertThrows(IncorrectResultSizeException.class, () ->
+        Assertions.assertThrows(JdbcClientException.class, () ->
                 jdbcClient.sql("SELECT id FROM engineers WHERE id = 999").singleValue(Long.class));
     }
 
