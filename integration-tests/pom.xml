@@ -93,10 +93,11 @@
                     </execution>
                 </executions>
             </plugin>
-            <!--<plugin>
-                <groupId>org.sonatype.central</groupId>
+            <plugin>
+                <groupId>io.github.mavenplugins</groupId>
                 <artifactId>central-publishing-maven-plugin</artifactId>
                 <configuration>
+                    <skipBundling>true</skipBundling>
                     <skipPublishing>true</skipPublishing>
                 </configuration>
             </plugin>
@@ -106,7 +107,7 @@
                 <configuration>
                     <skip>true</skip>
                 </configuration>
-            </plugin>-->
+            </plugin>
         </plugins>
     </build>
 
