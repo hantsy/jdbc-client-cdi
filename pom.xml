@@ -47,7 +47,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <!-- Maven Plugins -->
-        <maven-compiler-plugin.version>3.15.0</maven-compiler-plugin.version>
+        <maven-compiler-plugin.version>3.16.0</maven-compiler-plugin.version>
         <maven-surefire-plugin.version>3.6.0</maven-surefire-plugin.version>
         <maven-failsafe-plugin.version>3.6.0</maven-failsafe-plugin.version>
         <maven-dependency-plugin.version>3.11.0</maven-dependency-plugin.version>
@@ -120,13 +120,6 @@
                 <scope>import</scope>
             </dependency>
             <dependency>
-                <groupId>org.eclipse.microprofile</groupId>
-                <artifactId>microprofile</artifactId>
-                <version>${microprofile.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-            <dependency>
                 <groupId>org.junit</groupId>
                 <artifactId>junit-bom</artifactId>
                 <version>${junit.version}</version>
@@ -137,8 +130,23 @@
             <!-- Jakarta EE API (provided by the server) -->
             <dependency>
                 <groupId>jakarta.platform</groupId>
+                <artifactId>jakarta.jakartaee-bom</artifactId>
+                <version>${jakartaee-api.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>jakarta.platform</groupId>
                 <artifactId>jakarta.jakartaee-api</artifactId>
                 <version>${jakartaee-api.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.eclipse.microprofile</groupId>
+                <artifactId>microprofile</artifactId>
+                <version>${microprofile.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
             </dependency>
 
             <!-- test db -->
