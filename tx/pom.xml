@@ -12,7 +12,6 @@
     <artifactId>jdbc-client-tx</artifactId>
 
     <properties>
-        <maven.compiler.release>21</maven.compiler.release>
         <hikaricp.version>7.1.0</hikaricp.version>
     </properties>
 
@@ -66,10 +65,10 @@
                         </goals>
                         <configuration>
                             <release>25</release>
+                            <multiReleaseOutput>true</multiReleaseOutput>
                             <compileSourceRoots>
                                 <compileSourceRoot>${project.basedir}/src/main/java25</compileSourceRoot>
                             </compileSourceRoots>
-                            <outputDirectory>${project.build.outputDirectory}/META-INF/versions/25</outputDirectory>
                         </configuration>
                     </execution>
                 </executions>
