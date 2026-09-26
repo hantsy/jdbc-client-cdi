@@ -1,11 +1,10 @@
 package io.github.hantsy.jdbc.tx.it.event;
 
+import java.util.ArrayList;
+import java.util.List;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Observes;
 import jakarta.enterprise.event.TransactionPhase;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @ApplicationScoped
 public class EventObserver {

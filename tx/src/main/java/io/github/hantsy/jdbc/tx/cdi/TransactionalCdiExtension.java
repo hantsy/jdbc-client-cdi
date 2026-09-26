@@ -3,6 +3,12 @@ package io.github.hantsy.jdbc.tx.cdi;
 import io.github.hantsy.jdbc.tx.support.TransactionContextHolder;
 import io.github.hantsy.jdbc.tx.support.TransactionEventNotifier;
 import io.github.hantsy.jdbc.tx.support.TransactionSynchronizationManager;
+
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 import jakarta.enterprise.event.Observes;
 import jakarta.enterprise.event.Reception;
 import jakarta.enterprise.event.TransactionPhase;
@@ -18,12 +24,6 @@ import jakarta.inject.Singleton;
 import jakarta.interceptor.Interceptor;
 import jakarta.transaction.Transactional;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-
 /**
  * Portable extension that wires {@code jakarta.transaction.Transactional} to the CDI container:
  *
@@ -37,6 +37,18 @@ import java.util.Set;
 public class TransactionalCdiExtension implements Extension {
 
     private final List<CollectedObserver> transactionalObservers = new ArrayList<>();
+
+    private static <T> boolean hasTransactional(AnnotatedType<T> annotatedType) {
+        if (annotatedType.isAnnotationPresent(Transactional.class)) {
+            return true;
+        }
+        for (AnnotatedMethod<? super T> method : annotatedType.getMethods()) {
+            if (method.isAnnotationPresent(Transactional.class)) {
+                return true;
+            }
+        }
+        return false;
+    }
 
     public <T> void processAnnotatedType(@Observes ProcessAnnotatedType<T> event) {
         AnnotatedType<T> annotatedType = event.getAnnotatedType();
@@ -65,18 +77,6 @@ public class TransactionalCdiExtension implements Extension {
                 .createWith(ctx -> notifier);
 
         event.addObserverMethod(new CapturingObserver());
-    }
-
-    private static <T> boolean hasTransactional(AnnotatedType<T> annotatedType) {
-        if (annotatedType.isAnnotationPresent(Transactional.class)) {
-            return true;
-        }
-        for (AnnotatedMethod<? super T> method : annotatedType.getMethods()) {
-            if (method.isAnnotationPresent(Transactional.class)) {
-                return true;
-            }
-        }
-        return false;
     }
 
     private record CollectedObserver(TransactionPhase phase, ObserverMethod<?> observer) {

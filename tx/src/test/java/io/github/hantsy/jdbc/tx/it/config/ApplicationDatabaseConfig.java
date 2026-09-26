@@ -5,12 +5,12 @@ import com.zaxxer.hikari.HikariDataSource;
 import io.github.hantsy.jdbc.tx.PlatformTransactionManager;
 import io.github.hantsy.jdbc.tx.resourcelocal.DataSourceTransactionManager;
 import io.github.hantsy.jdbc.tx.resourcelocal.TransactionAwareDataSourceProxy;
+
+import javax.sql.DataSource;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Produces;
 import jakarta.enterprise.inject.Typed;
 import jakarta.inject.Named;
-
-import javax.sql.DataSource;
 
 /**
  * Single-DataSource CDI/DB support: raw pool, transaction-aware proxy (default {@code DataSource}),

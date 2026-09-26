@@ -23,8 +23,8 @@ This page focuses on the resource-local case and ends with a short note on the J
 </dependency>
 ```
 
-The module declares the CDI API and `jakarta.transaction-api` as `provided`: supply a CDI container
-(Weld SE, or a Servlet container with Weld) plus `jakarta.transaction-api` for the `@Transactional`
+The module declares the CDI API and `jakarta.transaction-api` as `provided`: supply a CDI container (Weld SE, or a
+Servlet container with Weld) plus `jakarta.transaction-api` for the `@Transactional`
 annotation.
 
 ### Wire the DataSource and the transaction manager
@@ -194,8 +194,8 @@ commits independently, so work across `DataSource`s is not atomic.
 ## Transactions in a full Jakarta EE runtime
 
 On a full Jakarta EE server JTA is built in, so `jakarta.transaction.Transactional` is handled by the
-container — no `jdbc-client-tx` dependency is needed. Expose the `DataSource` through JNDI
-(`@DataSourceDefinition` or the server's admin console) and let the container manage the transaction:
+container — no `jdbc-client-tx` dependency is needed. Expose the `DataSource` through JNDI (`@DataSourceDefinition` or
+the server's admin console) and let the container manage the transaction:
 
 ```java
 import jakarta.annotation.Resource;

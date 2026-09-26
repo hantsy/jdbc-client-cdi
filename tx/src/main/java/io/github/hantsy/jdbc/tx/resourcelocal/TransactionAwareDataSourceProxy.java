@@ -4,7 +4,6 @@ import io.github.hantsy.jdbc.tx.TransactionSystemException;
 import io.github.hantsy.jdbc.tx.support.TransactionSynchronization;
 import io.github.hantsy.jdbc.tx.support.TransactionSynchronizationManager;
 
-import javax.sql.DataSource;
 import java.io.PrintWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Proxy;
@@ -14,6 +13,7 @@ import java.sql.SQLFeatureNotSupportedException;
 import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.sql.DataSource;
 
 /**
  * {@link DataSource} decorator that makes a plain pool transaction-aware.
@@ -34,6 +34,22 @@ public class TransactionAwareDataSourceProxy implements DataSource {
 
     public TransactionAwareDataSourceProxy(DataSource delegate) {
         this.delegate = Objects.requireNonNull(delegate, "delegate must not be null");
+    }
+
+    private static Connection closeSuppressingProxy(Connection connection) {
+        return (Connection) Proxy.newProxyInstance(
+                Connection.class.getClassLoader(),
+                new Class<?>[]{Connection.class},
+                (proxy, method, args) -> {
+                    if ("close".equals(method.getName())) {
+                        return null;
+                    }
+                    try {
+                        return method.invoke(connection, args);
+                    } catch (InvocationTargetException e) {
+                        throw e.getCause();
+                    }
+                });
     }
 
     @Override
@@ -68,20 +84,44 @@ public class TransactionAwareDataSourceProxy implements DataSource {
         }
     }
 
-    private static Connection closeSuppressingProxy(Connection connection) {
-        return (Connection) Proxy.newProxyInstance(
-                Connection.class.getClassLoader(),
-                new Class<?>[]{Connection.class},
-                (proxy, method, args) -> {
-                    if ("close".equals(method.getName())) {
-                        return null;
-                    }
-                    try {
-                        return method.invoke(connection, args);
-                    } catch (InvocationTargetException e) {
-                        throw e.getCause();
-                    }
-                });
+    @Override
+    public Connection getConnection(String username, String password) throws SQLException {
+        return getConnection();
+    }
+
+    @Override
+    public <T> T unwrap(Class<T> iface) throws SQLException {
+        return delegate.unwrap(iface);
+    }
+
+    @Override
+    public boolean isWrapperFor(Class<?> iface) throws SQLException {
+        return delegate.isWrapperFor(iface);
+    }
+
+    @Override
+    public PrintWriter getLogWriter() throws SQLException {
+        return delegate.getLogWriter();
+    }
+
+    @Override
+    public void setLogWriter(PrintWriter out) throws SQLException {
+        delegate.setLogWriter(out);
+    }
+
+    @Override
+    public int getLoginTimeout() throws SQLException {
+        return delegate.getLoginTimeout();
+    }
+
+    @Override
+    public void setLoginTimeout(int seconds) throws SQLException {
+        delegate.setLoginTimeout(seconds);
+    }
+
+    @Override
+    public Logger getParentLogger() throws SQLFeatureNotSupportedException {
+        return delegate.getParentLogger();
     }
 
     private static final class JoiningSynchronization implements TransactionSynchronization {
@@ -115,45 +155,5 @@ public class TransactionAwareDataSourceProxy implements DataSource {
                 LOG.log(Level.WARNING, "Failed to clean up joined JDBC Connection", ex);
             }
         }
-    }
-
-    @Override
-    public Connection getConnection(String username, String password) throws SQLException {
-        return getConnection();
-    }
-
-    @Override
-    public <T> T unwrap(Class<T> iface) throws SQLException {
-        return delegate.unwrap(iface);
-    }
-
-    @Override
-    public boolean isWrapperFor(Class<?> iface) throws SQLException {
-        return delegate.isWrapperFor(iface);
-    }
-
-    @Override
-    public PrintWriter getLogWriter() throws SQLException {
-        return delegate.getLogWriter();
-    }
-
-    @Override
-    public void setLogWriter(PrintWriter out) throws SQLException {
-        delegate.setLogWriter(out);
-    }
-
-    @Override
-    public void setLoginTimeout(int seconds) throws SQLException {
-        delegate.setLoginTimeout(seconds);
-    }
-
-    @Override
-    public int getLoginTimeout() throws SQLException {
-        return delegate.getLoginTimeout();
-    }
-
-    @Override
-    public Logger getParentLogger() throws SQLFeatureNotSupportedException {
-        return delegate.getParentLogger();
     }
 }

@@ -17,7 +17,9 @@ import java.util.Map;
  */
 public final class TransactionContext {
 
-    /** Shared context representing "no active transaction" (used by NOT_SUPPORTED/NEVER/SUPPORTS). */
+    /**
+     * Shared context representing "no active transaction" (used by NOT_SUPPORTED/NEVER/SUPPORTS).
+     */
     public static final TransactionContext NON_TRANSACTIONAL = new TransactionContext(false);
 
     private final boolean actualTransactionActive;
@@ -35,7 +37,9 @@ public final class TransactionContext {
         return actualTransactionActive;
     }
 
-    /** Resources bound by owner identity (e.g. DataSource -> Connection). */
+    /**
+     * Resources bound by owner identity (e.g. DataSource -> Connection).
+     */
     public Map<Object, Object> getResources() {
         return resources;
     }

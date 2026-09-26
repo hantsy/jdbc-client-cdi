@@ -1,22 +1,23 @@
 package io.github.hantsy.jdbc.tx.it.lifecycle;
 
 import io.github.hantsy.jdbc.tx.PlatformTransactionManager;
-import io.github.hantsy.jdbc.tx.support.TransactionContext;
 import io.github.hantsy.jdbc.tx.TransactionDefinition;
 import io.github.hantsy.jdbc.tx.TransactionSystemException;
 import io.github.hantsy.jdbc.tx.cdi.TransactionalCdiExtension;
 import io.github.hantsy.jdbc.tx.cdi.TransactionalInterceptor;
+import io.github.hantsy.jdbc.tx.support.TransactionContext;
 import io.github.hantsy.jdbc.tx.support.TransactionSynchronization;
 import io.github.hantsy.jdbc.tx.support.TransactionSynchronizationManager;
-import jakarta.inject.Inject;
-import jakarta.inject.Singleton;
-import jakarta.transaction.Transactional;
 import org.jboss.weld.junit5.WeldInitiator;
 import org.jboss.weld.junit5.WeldJunit5Extension;
 import org.jboss.weld.junit5.WeldSetup;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
+import jakarta.transaction.Transactional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;

@@ -5,11 +5,11 @@ import com.zaxxer.hikari.HikariDataSource;
 import io.github.hantsy.jdbc.tx.PlatformTransactionManager;
 import io.github.hantsy.jdbc.tx.resourcelocal.DataSourceTransactionManager;
 import io.github.hantsy.jdbc.tx.resourcelocal.TransactionAwareDataSourceProxy;
+
+import javax.sql.DataSource;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Produces;
 import jakarta.inject.Named;
-
-import javax.sql.DataSource;
 
 /**
  * Two-DataSource CDI/DB support: an "order" and a "customer" pool, each exposed both raw and

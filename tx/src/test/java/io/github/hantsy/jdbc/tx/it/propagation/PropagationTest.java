@@ -5,15 +5,19 @@ import io.github.hantsy.jdbc.tx.cdi.TransactionalInterceptor;
 import io.github.hantsy.jdbc.tx.it.config.ApplicationDatabaseConfig;
 import io.github.hantsy.jdbc.tx.it.service.InnerService;
 import io.github.hantsy.jdbc.tx.it.service.OuterService;
-import jakarta.inject.Inject;
-import jakarta.transaction.TransactionalException;
 import org.jboss.weld.junit5.WeldInitiator;
 import org.jboss.weld.junit5.WeldJunit5Extension;
 import org.jboss.weld.junit5.WeldSetup;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
-import static org.junit.jupiter.api.Assertions.*;
+import jakarta.inject.Inject;
+import jakarta.transaction.TransactionalException;
+
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(WeldJunit5Extension.class)
 class PropagationTest {
@@ -27,8 +31,10 @@ class PropagationTest {
             TransactionalCdiExtension.class
     ).build();
 
-    @Inject private InnerService inner;
-    @Inject private OuterService outer;
+    @Inject
+    private InnerService inner;
+    @Inject
+    private OuterService outer;
 
     @Test
     void requiredStartsTransactionWhenAbsent() {

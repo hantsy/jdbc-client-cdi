@@ -4,12 +4,13 @@ import io.github.hantsy.jdbc.tx.cdi.TransactionalCdiExtension;
 import io.github.hantsy.jdbc.tx.cdi.TransactionalInterceptor;
 import io.github.hantsy.jdbc.tx.it.config.ApplicationDatabaseConfig;
 import io.github.hantsy.jdbc.tx.it.service.ConcreteService;
-import jakarta.inject.Inject;
 import org.jboss.weld.junit5.WeldInitiator;
 import org.jboss.weld.junit5.WeldJunit5Extension;
 import org.jboss.weld.junit5.WeldSetup;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+
+import jakarta.inject.Inject;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -25,7 +26,8 @@ class TransactionalAnnotationResolutionTest {
             TransactionalCdiExtension.class
     ).build();
 
-    @Inject private ConcreteService service;
+    @Inject
+    private ConcreteService service;
 
     @Test
     void resolvesClassLevelAnnotationFromSuperclass() {

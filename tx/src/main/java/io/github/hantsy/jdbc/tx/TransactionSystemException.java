@@ -12,7 +12,9 @@ public class TransactionSystemException extends TransactionException {
         this.originalException = cause;
     }
 
-    /** The underlying failure (for example, a {@code SQLException}). */
+    /**
+     * The underlying failure (for example, a {@code SQLException}).
+     */
     public Throwable getOriginalException() {
         return originalException;
     }

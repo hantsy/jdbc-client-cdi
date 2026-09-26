@@ -1,17 +1,18 @@
 package io.github.hantsy.jdbc.tx.it.concurrency;
 
-import io.github.hantsy.jdbc.tx.it.config.ApplicationDatabaseConfig;
-import io.github.hantsy.jdbc.tx.support.TransactionContextHolder;
 import io.github.hantsy.jdbc.tx.cdi.TransactionalCdiExtension;
 import io.github.hantsy.jdbc.tx.cdi.TransactionalInterceptor;
+import io.github.hantsy.jdbc.tx.it.config.ApplicationDatabaseConfig;
 import io.github.hantsy.jdbc.tx.it.service.IsolatedChildService;
 import io.github.hantsy.jdbc.tx.it.service.OrderProcessingService;
-import jakarta.inject.Inject;
+import io.github.hantsy.jdbc.tx.support.TransactionContextHolder;
 import org.jboss.weld.junit5.WeldInitiator;
 import org.jboss.weld.junit5.WeldJunit5Extension;
 import org.jboss.weld.junit5.WeldSetup;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+
+import jakarta.inject.Inject;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;

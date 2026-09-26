@@ -5,7 +5,6 @@ import io.github.hantsy.jdbc.tx.cdi.TransactionalInterceptor;
 import io.github.hantsy.jdbc.tx.it.config.ApplicationDatabaseConfig;
 import io.github.hantsy.jdbc.tx.it.service.IsolatedChildService;
 import io.github.hantsy.jdbc.tx.it.service.OrderProcessingService;
-import jakarta.inject.Inject;
 import org.jboss.weld.junit5.WeldInitiator;
 import org.jboss.weld.junit5.WeldJunit5Extension;
 import org.jboss.weld.junit5.WeldSetup;
@@ -13,12 +12,15 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
-import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
+import javax.sql.DataSource;
+import jakarta.inject.Inject;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.fail;
 
 @ExtendWith(WeldJunit5Extension.class)
 class TransactionExceptionClassificationTest {
@@ -32,8 +34,10 @@ class TransactionExceptionClassificationTest {
             TransactionalCdiExtension.class
     ).build();
 
-    @Inject private OrderProcessingService orderService;
-    @Inject private DataSource dataSource;
+    @Inject
+    private OrderProcessingService orderService;
+    @Inject
+    private DataSource dataSource;
 
     @BeforeEach
     void setupDatabaseTable() throws Exception {

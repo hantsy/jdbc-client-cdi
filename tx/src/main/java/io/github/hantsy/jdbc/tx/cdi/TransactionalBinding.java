@@ -1,13 +1,12 @@
 package io.github.hantsy.jdbc.tx.cdi;
 
-import jakarta.enterprise.util.AnnotationLiteral;
-import jakarta.interceptor.InterceptorBinding;
-
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import jakarta.enterprise.util.AnnotationLiteral;
+import jakarta.interceptor.InterceptorBinding;
 
 /**
  * Internal interceptor binding. The {@code jakarta.transaction.Transactional} {@code value()}

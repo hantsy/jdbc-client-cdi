@@ -16,12 +16,16 @@ public final class TransactionContextHolder {
     private TransactionContextHolder() {
     }
 
-    /** Returns the bound context, or {@code null} if none is bound. */
+    /**
+     * Returns the bound context, or {@code null} if none is bound.
+     */
     public static TransactionContext get() {
         return CURRENT.get();
     }
 
-    /** Whether any context (including {@link TransactionContext#NON_TRANSACTIONAL}) is bound. */
+    /**
+     * Whether any context (including {@link TransactionContext#NON_TRANSACTIONAL}) is bound.
+     */
     public static boolean isBound() {
         return CURRENT.get() != null;
     }

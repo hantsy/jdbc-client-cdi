@@ -6,8 +6,6 @@ import io.github.hantsy.jdbc.tx.it.config.MultiDatabaseConfig;
 import io.github.hantsy.jdbc.tx.it.service.CustomerService;
 import io.github.hantsy.jdbc.tx.it.service.MultiResourceService;
 import io.github.hantsy.jdbc.tx.it.service.OrderService;
-import jakarta.inject.Inject;
-import jakarta.inject.Named;
 import org.jboss.weld.junit5.WeldInitiator;
 import org.jboss.weld.junit5.WeldJunit5Extension;
 import org.jboss.weld.junit5.WeldSetup;
@@ -15,10 +13,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
-import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
+import javax.sql.DataSource;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -35,12 +35,19 @@ class MultiDataSourceTxTest {
             TransactionalCdiExtension.class
     ).build();
 
-    @Inject private OrderService orderService;
-    @Inject private CustomerService customerService;
-    @Inject private MultiResourceService multiResourceService;
+    @Inject
+    private OrderService orderService;
+    @Inject
+    private CustomerService customerService;
+    @Inject
+    private MultiResourceService multiResourceService;
 
-    @Inject @Named("orderRaw") private DataSource orderRaw;
-    @Inject @Named("customerRaw") private DataSource customerRaw;
+    @Inject
+    @Named("orderRaw")
+    private DataSource orderRaw;
+    @Inject
+    @Named("customerRaw")
+    private DataSource customerRaw;
 
     @BeforeEach
     void initTables() throws Exception {

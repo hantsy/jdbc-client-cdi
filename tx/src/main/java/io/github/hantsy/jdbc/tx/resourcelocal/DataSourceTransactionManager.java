@@ -6,12 +6,12 @@ import io.github.hantsy.jdbc.tx.TransactionSystemException;
 import io.github.hantsy.jdbc.tx.support.TransactionContext;
 import io.github.hantsy.jdbc.tx.support.TransactionSynchronization;
 
-import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.sql.DataSource;
 
 /**
  * Resource-local {@link PlatformTransactionManager} for a JDBC {@link DataSource}.

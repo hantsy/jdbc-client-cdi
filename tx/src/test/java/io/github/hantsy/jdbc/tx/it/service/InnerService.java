@@ -1,6 +1,7 @@
 package io.github.hantsy.jdbc.tx.it.service;
 
 import io.github.hantsy.jdbc.tx.support.TransactionSynchronizationManager;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 

@@ -7,6 +7,10 @@ import io.github.hantsy.jdbc.tx.support.TransactionContextHolder;
 import io.github.hantsy.jdbc.tx.support.TransactionEventNotifier;
 import io.github.hantsy.jdbc.tx.support.TransactionSynchronization;
 import io.github.hantsy.jdbc.tx.support.TransactionSynchronizationManager;
+
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.concurrent.ExecutionException;
 import jakarta.annotation.Priority;
 import jakarta.enterprise.event.TransactionPhase;
 import jakarta.inject.Inject;
@@ -15,10 +19,6 @@ import jakarta.interceptor.Interceptor;
 import jakarta.interceptor.InvocationContext;
 import jakarta.transaction.Transactional;
 import jakarta.transaction.TransactionalException;
-
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.concurrent.ExecutionException;
 
 /**
  * CDI interceptor honoring {@code jakarta.transaction.Transactional}: resolves the annotation,
@@ -39,6 +39,13 @@ public class TransactionalInterceptor {
 
     @Inject
     private TransactionEventNotifier eventNotifier;
+
+    @SuppressWarnings("unchecked")
+    private static <T extends Throwable> T sneakyThrow(Throwable throwable) throws T {
+        throw (T) throwable;
+    }
+
+    // --- lifecycle ---
 
     @AroundInvoke
     public Object manageTransaction(InvocationContext context) throws Exception {
@@ -69,8 +76,6 @@ public class TransactionalInterceptor {
             case REQUIRED -> active ? context.proceed() : executeNew(context, definition);
         };
     }
-
-    // --- lifecycle ---
 
     private Object executeNew(InvocationContext invocation, TransactionDefinition definition) throws Exception {
         TransactionContext context = transactionManager.getTransaction(definition);
@@ -132,6 +137,8 @@ public class TransactionalInterceptor {
         context.markCompleted();
     }
 
+    // --- annotation resolution ---
+
     private boolean shouldRollback(Throwable failure, TransactionDefinition definition) {
         Throwable candidate = failure;
         while (candidate.getCause() != null
@@ -150,8 +157,6 @@ public class TransactionalInterceptor {
         }
         return candidate instanceof RuntimeException || candidate instanceof Error;
     }
-
-    // --- annotation resolution ---
 
     private TransactionDefinition resolve(InvocationContext context) {
         Transactional annotation = resolveAnnotation(context);
@@ -216,10 +221,5 @@ public class TransactionalInterceptor {
             }
         }
         return null;
-    }
-
-    @SuppressWarnings("unchecked")
-    private static <T extends Throwable> T sneakyThrow(Throwable throwable) throws T {
-        throw (T) throwable;
     }
 }

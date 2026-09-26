@@ -15,17 +15,23 @@ public final class TransactionEventStore {
 
     private final List<Object> events = new ArrayList<>();
 
-    /** Adds an event payload fired during the transaction. */
+    /**
+     * Adds an event payload fired during the transaction.
+     */
     public void add(Object payload) {
         events.add(payload);
     }
 
-    /** Returns a snapshot of the buffered payloads. */
+    /**
+     * Returns a snapshot of the buffered payloads.
+     */
     public List<Object> payloads() {
         return List.copyOf(events);
     }
 
-    /** Whether no events have been buffered. */
+    /**
+     * Whether no events have been buffered.
+     */
     public boolean isEmpty() {
         return events.isEmpty();
     }

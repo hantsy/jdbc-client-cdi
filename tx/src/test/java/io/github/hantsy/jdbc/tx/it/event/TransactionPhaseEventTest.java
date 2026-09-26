@@ -3,7 +3,6 @@ package io.github.hantsy.jdbc.tx.it.event;
 import io.github.hantsy.jdbc.tx.cdi.TransactionalCdiExtension;
 import io.github.hantsy.jdbc.tx.cdi.TransactionalInterceptor;
 import io.github.hantsy.jdbc.tx.it.config.ApplicationDatabaseConfig;
-import jakarta.inject.Inject;
 import org.jboss.weld.junit5.WeldInitiator;
 import org.jboss.weld.junit5.WeldJunit5Extension;
 import org.jboss.weld.junit5.WeldSetup;
@@ -12,8 +11,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.util.List;
+import jakarta.inject.Inject;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @ExtendWith(WeldJunit5Extension.class)
 class TransactionPhaseEventTest {
@@ -27,8 +28,10 @@ class TransactionPhaseEventTest {
             TransactionalCdiExtension.class
     ).build();
 
-    @Inject private EventObserver observer;
-    @Inject private EventPublisher publisher;
+    @Inject
+    private EventObserver observer;
+    @Inject
+    private EventPublisher publisher;
 
     @BeforeEach
     void reset() {
