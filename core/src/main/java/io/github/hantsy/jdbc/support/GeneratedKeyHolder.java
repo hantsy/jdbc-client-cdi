@@ -4,9 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Default {@link KeyHolder} implementation backed by a mutable list.
- */
+/** Default {@link KeyHolder} implementation backed by a mutable list. */
 public class GeneratedKeyHolder implements KeyHolder {
 
     private final List<Map<String, Object>> keyList = new ArrayList<>();
@@ -20,7 +18,9 @@ public class GeneratedKeyHolder implements KeyHolder {
         if (first.isEmpty()) {
             return null;
         }
-        return first.values().iterator().next();
+        return first.values()
+                    .iterator()
+                    .next();
     }
 
     @Override

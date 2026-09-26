@@ -1,14 +1,12 @@
 package io.github.hantsy.jdbc.cdi;
 
+import javax.sql.DataSource;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Produces;
 import org.h2.jdbcx.JdbcDataSource;
 
-import javax.sql.DataSource;
-
-/**
- * Provides an in-memory H2 {@link DataSource} for the CDI unit tests.
- */
+/** Provides an in-memory H2 {@link DataSource} for the CDI unit tests. */
 @ApplicationScoped
 public class TestDataSourceProducer {
 

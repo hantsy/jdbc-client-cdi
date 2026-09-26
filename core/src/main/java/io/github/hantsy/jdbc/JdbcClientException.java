@@ -6,7 +6,7 @@ package io.github.hantsy.jdbc;
  *
  * <p>The code identifies the kind of failure without requiring callers to
  * depend on multiple exception subclasses. The original cause is retained when
- * the failure originated in JDBC or row-mapping code.</p>
+ * the failure originated in JDBC or row-mapping code.
  */
 public class JdbcClientException extends RuntimeException {
 
@@ -16,7 +16,7 @@ public class JdbcClientException extends RuntimeException {
      * <p>Codes describe the failure contract rather than the underlying
      * implementation exception. Callers should use these values for
      * programmatic handling and use the exception message and cause for
-     * diagnostics.</p>
+     * diagnostics.
      */
     public enum Code {
         /** A failure that does not fit another specific code. */
@@ -29,19 +29,19 @@ public class JdbcClientException extends RuntimeException {
         MAPPING_FAILURE,
 
         /**
-         * A single-result operation expected one row but the query returned
-         * no rows. This is emitted by {@code single()} and
-         * {@code singleValue(...)} only.
+         * A single-result operation expected one row but the query returned no
+         * rows. This is emitted by {@code single()} and {@code
+         * singleValue(...)} only.
          */
         NO_RESULT,
 
         /**
-         * A single-result operation received more than one row. This is
-         * emitted by {@code single()} and {@code optional()} only.
+         * A single-result operation received more than one row. This is emitted
+         * by {@code single()} and {@code optional()} only.
          *
-         * <p>An empty list from {@code list()} and
-         * {@code Optional.empty()} from {@code optional()} are successful
-         * results and do not produce this code.</p>
+         * <p>An empty list from {@code list()} and {@code Optional.empty()}
+         * from {@code optional()} are successful results and do not produce
+         * this code.
          */
         TOO_MANY_RESULTS
     }

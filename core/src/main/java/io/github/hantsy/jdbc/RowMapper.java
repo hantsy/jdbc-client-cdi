@@ -6,13 +6,13 @@ import java.sql.SQLException;
 /**
  * Maps one row of a JDBC {@link ResultSet} to an application object.
  *
- * <p>A row mapper contains only row-mapping logic. It does not advance the result
- * set, close JDBC resources, or handle the query lifecycle; {@link JdbcClient}
- * manages those responsibilities. Mappers are normally stateless and can be
- * safely reused for multiple queries.</p>
+ * <p>A row mapper contains only row-mapping logic. It does not advance the
+ * result set, close JDBC resources, or handle the query lifecycle; {@link
+ * JdbcClient} manages those responsibilities. Mappers are normally stateless
+ * and can be safely reused for multiple queries.
  *
  * <p>The row number is zero-based and identifies the row within the current
- * query result. For example, a lambda can map a result to a small projection:</p>
+ * query result. For example, a lambda can map a result to a small projection:
  *
  * <pre>{@code
  * RowMapper<String> names = (rs, rowNum) -> rs.getString("dev_name");
@@ -25,7 +25,7 @@ import java.sql.SQLException;
  *
  * <p>For reusable mappings, implement this interface explicitly. The mapper
  * below maps column values to a domain object and may be shared by several
- * queries:</p>
+ * queries:
  *
  * <pre>{@code
  * final class EngineerMapper implements RowMapper<Engineer> {
@@ -43,10 +43,10 @@ import java.sql.SQLException;
  *         .list();
  * }</pre>
  *
- * <p>Implementations should read the current row only and should avoid retaining
- * the {@code ResultSet} after this method returns. Any {@link SQLException}
- * raised while reading the row is propagated through the client's normal data
- * access exception handling.</p>
+ * <p>Implementations should read the current row only and should avoid
+ * retaining the {@code ResultSet} after this method returns. Any {@link
+ * SQLException} raised while reading the row is propagated through the client's
+ * normal data access exception handling.
  *
  * @param <T> the type produced for each result-set row
  * @see JdbcClient.SqlSpec#query(RowMapper)
