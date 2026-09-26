@@ -2,18 +2,6 @@ package io.github.hantsy.jdbc;
 
 import io.github.hantsy.jdbc.support.GeneratedKeyHolder;
 import io.github.hantsy.jdbc.support.KeyHolder;
-
-import jakarta.inject.Inject;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.Statement;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.sql.DataSource;
-
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.junit5.container.annotation.ArquillianTest;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
@@ -23,6 +11,17 @@ import org.jboss.shrinkwrap.resolver.api.maven.Maven;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import jakarta.inject.Inject;
+import javax.sql.DataSource;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.Statement;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 @ArquillianTest
 public class JdbcClientIT {

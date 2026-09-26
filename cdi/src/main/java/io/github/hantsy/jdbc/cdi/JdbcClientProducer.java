@@ -1,7 +1,5 @@
 package io.github.hantsy.jdbc.cdi;
 
-import javax.sql.DataSource;
-
 import io.github.hantsy.jdbc.JdbcClient;
 import io.github.hantsy.jdbc.JdbcConfig;
 import io.github.hantsy.jdbc.converter.ConverterRegistry;
@@ -9,6 +7,7 @@ import io.github.hantsy.jdbc.converter.ConverterRegistry;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Instance;
 import jakarta.enterprise.inject.Produces;
+import javax.sql.DataSource;
 
 /**
  * Produces the {@code @ApplicationScoped} {@link JdbcClient} bean. The {@link

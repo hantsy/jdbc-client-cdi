@@ -1,13 +1,5 @@
 package io.github.hantsy.jdbc;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import javax.sql.DataSource;
-
 import io.github.hantsy.jdbc.JdbcClientException.Code;
 import io.github.hantsy.jdbc.support.GeneratedKeyHolder;
 import org.h2.jdbcx.JdbcDataSource;
@@ -16,6 +8,14 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import javax.sql.DataSource;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 /**
  * Fast, container-free smoke test that constructs {@link JdbcClient} directly

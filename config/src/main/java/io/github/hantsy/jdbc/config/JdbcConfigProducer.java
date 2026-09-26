@@ -1,12 +1,11 @@
 package io.github.hantsy.jdbc.config;
 
 import io.github.hantsy.jdbc.JdbcConfig;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Produces;
 import jakarta.inject.Inject;
-
-import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 /**
  * Produces the {@code @ApplicationScoped} {@link JdbcConfig} bean from the

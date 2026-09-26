@@ -1,9 +1,9 @@
 package io.github.hantsy.jdbc.support;
 
+import io.github.hantsy.jdbc.JdbcClient;
+
 import java.util.List;
 import java.util.Map;
-
-import io.github.hantsy.jdbc.JdbcClient;
 
 /**
  * Holds the auto-generated keys returned by a JDBC {@code

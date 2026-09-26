@@ -1,5 +1,11 @@
 package io.github.hantsy.jdbc;
 
+import io.github.hantsy.jdbc.JdbcClientException.Code;
+import io.github.hantsy.jdbc.converter.Converter;
+import io.github.hantsy.jdbc.converter.ConverterRegistry;
+import io.github.hantsy.jdbc.support.KeyHolder;
+
+import javax.sql.DataSource;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.RecordComponent;
@@ -35,12 +41,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
-import javax.sql.DataSource;
-
-import io.github.hantsy.jdbc.JdbcClientException.Code;
-import io.github.hantsy.jdbc.converter.Converter;
-import io.github.hantsy.jdbc.converter.ConverterRegistry;
-import io.github.hantsy.jdbc.support.KeyHolder;
 
 /**
  * Fluent JDBC client for executing parameterized SQL against a {@link
