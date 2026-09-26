@@ -14,24 +14,61 @@ on:
 
 jobs:
   build:
-    name: Build on JDK ${{ matrix.java }}
+    name: Build on JDK 25
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        java: [ '21', '25' ]
     steps:
       - name: Checkout
         uses: actions/checkout@v7
 
-      - name: Set up JDK ${{ matrix.java }}
+      - name: Set up JDK 25
         uses: actions/setup-java@v6
         with:
-          java-version: ${{ matrix.java }}
-          distribution: temurin
-          cache: maven
+          java-version: '25'
+          distribution: 'temurin'
 
-      - name: Build and unit test
-        run: mvn -B -ntp install
+      # Build everything and install it to the local project target folders.
+      # We skip tests here so we can run them in the matrix next.
+      - name: Build
+        run: mvn clean install -DskipTests
+
+      # Save the compiled targets so the next job can reuse them
+      - name: Cache Build Targets
+        uses: actions/upload-artifact@v4
+        with:
+          name: compiled-project-modules
+          path: |
+            **/target/
+            !**/target/maven-archiver/
+
+  # STEP 2: Run tests on a matrix containing both Java 21 and Java 25
+  test:
+    name: Run Tests on Java ${{ matrix.java-version }}
+    needs: build
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        java-version: [ '21', '25' ]
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v7
+
+      - name: Set up Test Runtime Environment
+        uses: actions/setup-java@v6
+        with:
+          java-version: ${{ matrix.java-version }}
+          distribution: 'temurin'
+          cache: 'maven'
+
+      - name: Download Compiled Targets
+        uses: actions/download-artifact@v4
+        with:
+          name: compiled-project-modules
+
+      # Execute only the tests across all modules (core, config, cdi, tx)
+      - name: Run Surefire Test Phase
+        run: mvn surefire:test
 
   integration-tests-glassfish:
     name: Integration tests (GlassFish)
@@ -55,10 +92,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v7
 
-      - name: Set up JDK 21
+      - name: Set up JDK 25
         uses: actions/setup-java@v6
         with:
-          java-version: '21'
+          java-version: '25'
           distribution: temurin
           cache: maven
 
@@ -90,10 +127,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v7
 
-      - name: Set up JDK 21
+      - name: Set up JDK 25
         uses: actions/setup-java@v6
         with:
-          java-version: '21'
+          java-version: '25'
           distribution: temurin
           cache: maven
 

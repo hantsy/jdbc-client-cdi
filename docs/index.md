@@ -3,13 +3,14 @@
 Fluent JDBC Client is a lightweight, framework-agnostic JDBC client for Jakarta EE and CDI applications. It provides the
 fluent developer experience of Spring's `JdbcClient` without introducing a Spring dependency.
 
-The project is organized into three core modules:
+The project is organized into four core modules:
 
-| Module   | Artifact             | Description                                                                                                |
-|----------|----------------------|------------------------------------------------------------------------------------------------------------|
-| `core`   | `jdbc-client-core`   | Contains the plain `JdbcClient` API and helper types. It depends only on the JDK's `javax.sql.DataSource`. |
-| `config` | `jdbc-client-config` | Integrates with MicroProfile Config and exposes a configurable `JdbcConfig` bean.                          |
-| `cdi`    | `jdbc-client-cdi`    | Provides CDI producers for `JdbcClient` and the CDI-discovered `ConverterRegistry`.                        |
+| Module   | Artifact             | Description                                                                                                                                      |
+|----------|----------------------|--------------------------------------------------------------------------------------------------------------------------------------------------|
+| `core`   | `jdbc-client-core`   | Contains the plain `JdbcClient` API and helper types. It depends only on the JDK's `javax.sql.DataSource`.                                       |
+| `config` | `jdbc-client-config` | Integrates with MicroProfile Config and exposes a configurable `JdbcConfig` bean.                                                                |
+| `cdi`    | `jdbc-client-cdi`    | Provides CDI producers for `JdbcClient` and the CDI-discovered `ConverterRegistry`.                                                              |
+| `tx`     | `jdbc-client-tx`     | Provides resource-local transaction management for Java SE and Servlet containers via a CDI interceptor for `jakarta.transaction.Transactional`. |
 
 The repository also includes Arquillian integration tests for GlassFish and WildFly. These examples provide a practical
 reference for validating Jakarta EE/CDI applications in real runtimes.
@@ -20,3 +21,4 @@ Follow this reading order:
 - Continue with [quickstart](quickstart.md) for the fastest path to using the client.
 - Explore [querying and result mapping](querying.md) and [updates](updates.md) for detailed behavior.
 - Review [configuration](configuration.md) for placeholders, timeouts, and defaults.
+- Read [transactions](transactions.md) to add declarative transactions to Java SE or Servlet applications.

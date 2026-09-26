@@ -59,3 +59,4 @@ nav:
       - Querying and Result mapping: querying.md
       - Updates and generated keys: updates.md
   - Configuration: configuration.md
+  - Transactions: transactions.md

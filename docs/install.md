@@ -51,6 +51,21 @@ To configure the library from MicroProfile Config properties, add the optional c
 </dependency>
 ```
 
+## Adding resource-local transactions
+
+To use declarative transactions in a Java SE or Servlet environment, add the transaction module:
+
+```xml
+<dependency>
+    <groupId>io.github.hantsy.jdbc</groupId>
+    <artifactId>jdbc-client-tx</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+</dependency>
+```
+
+This module provides a CDI interceptor for `jakarta.transaction.Transactional`. It requires a CDI
+container and `jakarta.transaction-api`; see [transactions](transactions.md) for setup and usage.
+
 All modules are published with the same version. Replace the snapshot version shown above with the release version used
 by the application.
 

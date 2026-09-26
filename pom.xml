@@ -39,6 +39,7 @@
         <module>config</module>
         <module>cdi</module>
         <module>integration-tests</module>
+        <module>tx</module>
     </modules>
 
     <properties>
@@ -95,6 +96,11 @@
             <dependency>
                 <groupId>io.github.hantsy.jdbc</groupId>
                 <artifactId>jdbc-client-cdi</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.github.hantsy.jdbc</groupId>
+                <artifactId>jdbc-client-tx</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
