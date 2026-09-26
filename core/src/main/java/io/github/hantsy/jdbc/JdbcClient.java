@@ -1,20 +1,46 @@
 package io.github.hantsy.jdbc;
 
-import io.github.hantsy.jdbc.converter.Converter;
-import io.github.hantsy.jdbc.converter.ConverterRegistry;
-import io.github.hantsy.jdbc.support.KeyHolder;
-
-import javax.sql.DataSource;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.RecordComponent;
-import java.sql.*;
-import java.util.*;
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.sql.Connection;
+import java.sql.Date;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.sql.Time;
+import java.sql.Timestamp;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.Spliterator;
 import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
+import javax.sql.DataSource;
+
+import io.github.hantsy.jdbc.JdbcClientException.Code;
+import io.github.hantsy.jdbc.converter.Converter;
+import io.github.hantsy.jdbc.converter.ConverterRegistry;
+import io.github.hantsy.jdbc.support.KeyHolder;
 
 /**
  * Fluent JDBC client for executing parameterized SQL against a {@link DataSource}.
@@ -62,21 +88,20 @@ public class JdbcClient {
     }
 
     /**
-     * Creates a client with {@link JdbcConfig#DEFAULT default config} and an empty converter registry.
+     * Creates a client with {@link JdbcConfig#DEFAULT default config} and an
+     * empty converter registry.
      */
     public JdbcClient(DataSource dataSource) {
         this(dataSource, new ConverterRegistry(), JdbcConfig.DEFAULT);
     }
 
-
     /**
-     * No-arg constructor required for CDI client proxies; a client created this way is not usable until
-     * its {@link DataSource} is supplied. Use {@link #JdbcClient(DataSource)} or
-     * {@link #builder(DataSource)} for normal construction.
+     * No-arg constructor required for CDI client proxies; a client created this
+     * way is not usable until its {@link DataSource} is supplied. Use {@link
+     * #JdbcClient(DataSource)} or {@link #builder(DataSource)} for normal
+     * construction.
      */
-    public JdbcClient() {
-    }
-
+    public JdbcClient() {}
 
     /** Sets the data source used by subsequent operations. */
     public void setDataSource(DataSource dataSource) {
@@ -145,8 +170,7 @@ public class JdbcClient {
 
         /** Builds the configured client. */
         public JdbcClient build() {
-            return new JdbcClient(dataSource, converters,
-                    new JdbcConfig(placeholder, queryTimeout, fetchSize));
+            return new JdbcClient(dataSource, converters, new JdbcConfig(placeholder, queryTimeout, fetchSize));
         }
     }
 
@@ -205,7 +229,8 @@ public class JdbcClient {
          * @param name parameter name
          * @param value parameter value
          * @return this statement
-         * @throws IllegalArgumentException if positional parameters were already added
+         * @throws IllegalArgumentException if positional parameters were
+         *     already added
          */
         public SqlSpec param(String name, Object value) {
             if (!positionalParams.isEmpty()) {
@@ -235,7 +260,8 @@ public class JdbcClient {
          *
          * @param values parameter names and values
          * @return this statement
-         * @throws IllegalArgumentException if positional parameters were already added
+         * @throws IllegalArgumentException if positional parameters were
+         *     already added
          */
         public SqlSpec params(Map<String, ?> values) {
             if (!positionalParams.isEmpty()) {
@@ -314,10 +340,7 @@ public class JdbcClient {
          *         if no row exists
          */
         public <T> T singleValue(Class<T> clazz) {
-            return optionalValue(clazz)
-                    .orElseThrow(() -> new JdbcClientException(
-                            JdbcClientException.Code.NO_RESULT,
-                            "Expected a single value but got none"));
+            return optionalValue(clazz).orElseThrow(() -> new JdbcClientException(Code.NO_RESULT, "Expected a single value but got none"));
         }
 
         /**
@@ -370,9 +393,7 @@ public class JdbcClient {
             boolean returnKeys = keyHolder != null;
             return execute(() -> {
                 try (Connection conn = dataSource.getConnection();
-                     PreparedStatement ps = returnKeys
-                             ? conn.prepareStatement(parsed.jdbcSql, Statement.RETURN_GENERATED_KEYS)
-                             : conn.prepareStatement(parsed.jdbcSql)) {
+                     PreparedStatement ps = returnKeys ? conn.prepareStatement(parsed.jdbcSql, Statement.RETURN_GENERATED_KEYS) : conn.prepareStatement(parsed.jdbcSql)) {
                     applyStatementHints(ps);
                     bindParameters(ps, parsed.orderedParamNames);
                     int rows = ps.executeUpdate();
@@ -450,14 +471,15 @@ public class JdbcClient {
             /** Returns every mapped row as a list. */
             public List<T> list() {
                 ParsedSql parsed = parseSql(rawSql);
-                return executeQuery(parsed, rs -> {
-                    List<T> results = new ArrayList<>();
-                    int rowNum = 0;
-                    while (rs.next()) {
-                        results.add(rowMapper.mapRow(rs, rowNum++));
-                    }
-                    return results;
-                });
+                return executeQuery(parsed,
+                        rs -> {
+                            List<T> results = new ArrayList<>();
+                            int rowNum = 0;
+                            while (rs.next()) {
+                                results.add(rowMapper.mapRow(rs, rowNum++));
+                            }
+                            return results;
+                        });
             }
 
             /**
@@ -468,20 +490,17 @@ public class JdbcClient {
              */
             public T single() {
                 ParsedSql parsed = parseSql(rawSql);
-                return executeQuery(parsed, rs -> {
-                    if (!rs.next()) {
-                        throw new JdbcClientException(
-                                JdbcClientException.Code.NO_RESULT,
-                                "Expected exactly 1 row but got 0");
-                    }
-                    T result = rowMapper.mapRow(rs, 0);
-                    if (rs.next()) {
-                        throw new JdbcClientException(
-                                JdbcClientException.Code.TOO_MANY_RESULTS,
-                                "Expected exactly 1 row but got more than 1");
-                    }
-                    return result;
-                });
+                return executeQuery(parsed,
+                        rs -> {
+                            if (!rs.next()) {
+                                throw new JdbcClientException(Code.NO_RESULT, "Expected exactly 1 row but got 0");
+                            }
+                            T result = rowMapper.mapRow(rs, 0);
+                            if (rs.next()) {
+                                throw new JdbcClientException(Code.TOO_MANY_RESULTS, "Expected exactly 1 row but got more than 1");
+                            }
+                            return result;
+                        });
             }
 
             /**
@@ -492,18 +511,17 @@ public class JdbcClient {
              */
             public Optional<T> optional() {
                 ParsedSql parsed = parseSql(rawSql);
-                return executeQuery(parsed, rs -> {
-                    if (!rs.next()) {
-                        return Optional.empty();
-                    }
-                    T result = rowMapper.mapRow(rs, 0);
-                    if (rs.next()) {
-                        throw new JdbcClientException(
-                                JdbcClientException.Code.TOO_MANY_RESULTS,
-                                "Expected at most 1 row but got more than 1");
-                    }
-                    return Optional.of(result);
-                });
+                return executeQuery(parsed,
+                        rs -> {
+                            if (!rs.next()) {
+                                return Optional.empty();
+                            }
+                            T result = rowMapper.mapRow(rs, 0);
+                            if (rs.next()) {
+                                throw new JdbcClientException(Code.TOO_MANY_RESULTS, "Expected at most 1 row but got more than 1");
+                            }
+                            return Optional.of(result);
+                        });
             }
 
             /**
@@ -530,10 +548,9 @@ public class JdbcClient {
                     final Connection c = conn;
                     final PreparedStatement s = ps;
                     final ResultSet r = rs;
-                    return StreamSupport.stream(new ResultSetSpliterator<>(r, rowMapper), false)
-                            .onClose(() -> closeQuietly(r, s, c));
+                    return StreamSupport.stream(new ResultSetSpliterator<>(r, rowMapper), false).onClose(() -> closeQuietly(r, s, c));
                 } catch (SQLException e) {
-                throw new JdbcClientException(JdbcClientException.Code.JDBC, e.getMessage(), e);
+                    throw new JdbcClientException(Code.JDBC, e.getMessage(), e);
                 } finally {
                     if (!opened) {
                         closeQuietly(rs, ps, conn);
@@ -546,7 +563,7 @@ public class JdbcClient {
             try {
                 return executor.execute();
             } catch (SQLException e) {
-                throw new JdbcClientException(JdbcClientException.Code.JDBC, e.getMessage(), e);
+                throw new JdbcClientException(Code.JDBC, e.getMessage(), e);
             }
         }
 
@@ -603,9 +620,9 @@ public class JdbcClient {
         }
 
         /**
-         * Rewrites {@code :name} placeholders into the configured symbol — positional {@code ?},
-         * numbered {@code $1}/{@code :1}, or named {@code @name} — and returns the ordered parameter
-         * names.
+         * Rewrites {@code :name} placeholders into the configured symbol —
+         * positional {@code ?}, numbered {@code $1}/{@code :1}, or named
+         * {@code @name} — and returns the ordered parameter names.
          */
         private ParsedSql parseSql(String sql) {
             if (!positionalParams.isEmpty()) {
@@ -636,7 +653,6 @@ public class JdbcClient {
             matcher.appendTail(sb);
             return new ParsedSql(sb.toString(), parameterNames);
         }
-
     }
 
     /**
@@ -658,21 +674,15 @@ public class JdbcClient {
             } catch (JdbcClientException e) {
                 throw e;
             } catch (SQLException | RuntimeException e) {
-                throw new JdbcClientException(
-                        JdbcClientException.Code.MAPPING_FAILURE,
-                        "Failed to map result row " + rowNum,
-                        e);
+                throw new JdbcClientException(Code.MAPPING_FAILURE, "Failed to map result row " + rowNum, e);
             }
         };
     }
 
     private class TypedRowMapper<T> implements RowMapper<T> {
 
-        private static final Set<Class<?>> SIMPLE_TYPES = Set.of(
-                String.class, Boolean.class, Character.class,
-                java.sql.Date.class, java.sql.Time.class, java.sql.Timestamp.class,
-                byte[].class
-        );
+        private static final Set<Class<?>> SIMPLE_TYPES = Set.of(String.class, Boolean.class, Character.class, Date.class, Time.class, Timestamp.class,
+                byte[].class);
 
         private final Class<T> targetClass;
 
@@ -691,7 +701,10 @@ public class JdbcClient {
                 int columnCount = metaData.getColumnCount();
                 Map<String, Object> rowValues = new HashMap<>();
                 for (int i = 1; i <= columnCount; i++) {
-                    rowValues.put(metaData.getColumnLabel(i).toLowerCase().replace("_", ""), rs.getObject(i));
+                    rowValues.put(metaData.getColumnLabel(i)
+                                          .toLowerCase()
+                                          .replace("_", ""),
+                            rs.getObject(i));
                 }
 
                 if (targetClass.isRecord()) {
@@ -703,7 +716,8 @@ public class JdbcClient {
                     Constructor<?> c = targetClass.getDeclaredConstructor(paramTypes);
                     Object[] args = new Object[components.length];
                     for (int i = 0; i < components.length; i++) {
-                        Object val = rowValues.get(components[i].getName().toLowerCase());
+                        Object val = rowValues.get(components[i].getName()
+                                .toLowerCase());
                         args[i] = applyConversions(val, paramTypes[i]);
                     }
                     return targetClass.cast(c.newInstance(args));
@@ -713,7 +727,8 @@ public class JdbcClient {
                         String name = f.getName().toLowerCase();
                         if (rowValues.containsKey(name)) {
                             f.setAccessible(true);
-                            f.set(instance, applyConversions(rowValues.get(name), f.getType()));
+                            f.set(instance,
+                                    applyConversions(rowValues.get(name), f.getType()));
                         }
                     }
                     return instance;
@@ -754,13 +769,13 @@ public class JdbcClient {
             if (targetType == Boolean.class || targetType == boolean.class) {
                 return convertBoolean(value);
             }
-            if (value instanceof java.sql.Timestamp ts) {
+            if (value instanceof Timestamp ts) {
                 return convertTimestamp(ts, targetType);
             }
-            if (value instanceof java.sql.Date d && targetType == java.time.LocalDate.class) {
+            if (value instanceof Date d && targetType == LocalDate.class) {
                 return d.toLocalDate();
             }
-            if (value instanceof java.sql.Time t && targetType == java.time.LocalTime.class) {
+            if (value instanceof Time t && targetType == LocalTime.class) {
                 return t.toLocalTime();
             }
 
@@ -786,11 +801,11 @@ public class JdbcClient {
             if (targetType == Float.class || targetType == float.class) {
                 return num.floatValue();
             }
-            if (targetType == java.math.BigDecimal.class) {
-                return new java.math.BigDecimal(num.toString());
+            if (targetType == BigDecimal.class) {
+                return new BigDecimal(num.toString());
             }
-            if (targetType == java.math.BigInteger.class) {
-                return java.math.BigInteger.valueOf(num.longValue());
+            if (targetType == BigInteger.class) {
+                return BigInteger.valueOf(num.longValue());
             }
             if (targetType == String.class) {
                 return num.toString();
@@ -811,25 +826,24 @@ public class JdbcClient {
             return value;
         }
 
-        private Object convertTimestamp(java.sql.Timestamp ts, Class<?> targetType) {
-            if (targetType == java.time.LocalDateTime.class) {
+        private Object convertTimestamp(Timestamp ts, Class<?> targetType) {
+            if (targetType == LocalDateTime.class) {
                 return ts.toLocalDateTime();
             }
-            if (targetType == java.time.LocalDate.class) {
+            if (targetType == LocalDate.class) {
                 return ts.toLocalDateTime().toLocalDate();
             }
-            if (targetType == java.time.Instant.class) {
+            if (targetType == Instant.class) {
                 return ts.toInstant();
             }
-            if (targetType == java.time.OffsetDateTime.class) {
-                return ts.toInstant().atOffset(java.time.ZoneOffset.UTC);
+            if (targetType == OffsetDateTime.class) {
+                return ts.toInstant().atOffset(ZoneOffset.UTC);
             }
             return ts;
         }
     }
 
-    private record ParsedSql(String jdbcSql, List<String> orderedParamNames) {
-    }
+    private record ParsedSql(String jdbcSql, List<String> orderedParamNames) {}
 
     @FunctionalInterface
     private interface SQLExecutor<R> {
@@ -860,7 +874,7 @@ public class JdbcClient {
                 }
                 return false;
             } catch (SQLException e) {
-                throw new JdbcClientException(JdbcClientException.Code.JDBC, e.getMessage(), e);
+                throw new JdbcClientException(Code.JDBC, e.getMessage(), e);
             }
         }
 

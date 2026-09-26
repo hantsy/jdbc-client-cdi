@@ -4,15 +4,18 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 
 /**
- * Reflection helpers that resolve a {@link Converter} implementation's generic {@code <S, T>} type
- * arguments. Used by {@link ConverterRegistry} and by the CDI layer when discovering converter beans.
+ * Reflection helpers that resolve a {@link Converter} implementation's generic
+ * {@code <S, T>} type arguments. Used by {@link ConverterRegistry} and by the
+ * CDI layer when discovering converter beans.
  */
 public final class Converters {
 
-    private Converters() {
-    }
+    private Converters() {}
 
-    /** Walks the class hierarchy to find the {@code Converter<S, T>} generic interface and return its type arguments. */
+    /**
+     * Walks the class hierarchy to find the {@code Converter<S, T>} generic
+     * interface and return its type arguments.
+     */
     public static Type[] typeArguments(Class<?> clazz) {
         Class<?> current = clazz;
         while (current != null && current != Object.class) {

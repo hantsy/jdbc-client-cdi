@@ -20,7 +20,9 @@ public class GeneratedKeyHolder implements KeyHolder {
         if (first.isEmpty()) {
             return null;
         }
-        return first.values().iterator().next();
+        return first.values()
+                    .iterator()
+                    .next();
     }
 
     @Override
