@@ -43,43 +43,6 @@ cd jdbc-client-cdi
 ./mvnw clean install
 ```
 
-### Building the examples
-
-The examples are excluded from the main reactor and build separately. Install the
-main modules first, then build each example:
-
-```bash
-./mvnw install -DskipTests
-
-# vanilla (core only)
-./mvnw -f examples/pom.xml -pl vanilla verify
-
-# javase (core + CDI via Weld SE)
-./mvnw -f examples/pom.xml -pl javase verify
-
-# servlet (Arquillian integration tests on embedded Tomcat 11)
-./mvnw -f examples/pom.xml -pl servlet -Parq-tomcat-embedded verify
-
-# jakartaee (Arquillian integration tests; requires PostgreSQL on localhost:5432)
-./mvnw -f examples/pom.xml -pl jakartaee -Parq-glassfish-managed verify
-./mvnw -f examples/pom.xml -pl jakartaee -Parq-wildfly-managed verify
-```
-
-Run the applications locally:
-
-```bash
-# jakartaee on GlassFish 8
-./mvnw -f examples/pom.xml -pl jakartaee -Pglassfish clean package cargo:run
-
-# jakartaee on WildFly 41
-./mvnw -f examples/pom.xml -pl jakartaee -Pwildfly clean package wildfly:run
-
-# servlet on embedded Tomcat 11
-./mvnw -f examples/pom.xml -pl servlet -Ptomcat-embedded clean package cargo:run
-```
-
-The `vanilla` and `javase` examples expose a `main` method that can be run from your IDE.
-
 ### Building the documentation
 
 For a local documentation site:
