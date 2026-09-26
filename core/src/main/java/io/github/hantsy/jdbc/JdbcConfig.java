@@ -11,7 +11,9 @@ public class JdbcConfig {
     private int queryTimeout;
     private int fetchSize;
 
-    /** No-arg constructor required for CDI client proxies. */
+    /**
+     * No-arg constructor required for CDI client proxies.
+     */
     public JdbcConfig() {
     }
 
@@ -36,12 +38,16 @@ public class JdbcConfig {
         return placeholder;
     }
 
-    /** The default query timeout in seconds ({@code 0} = no timeout). */
+    /**
+     * The default query timeout in seconds ({@code 0} = no timeout).
+     */
     public int queryTimeout() {
         return queryTimeout;
     }
 
-    /** The default fetch size hint ({@code 0} = driver default). */
+    /**
+     * The default fetch size hint ({@code 0} = driver default).
+     */
     public int fetchSize() {
         return fetchSize;
     }

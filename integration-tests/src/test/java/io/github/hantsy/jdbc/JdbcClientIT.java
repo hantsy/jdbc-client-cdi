@@ -2,7 +2,6 @@ package io.github.hantsy.jdbc;
 
 import io.github.hantsy.jdbc.support.GeneratedKeyHolder;
 import io.github.hantsy.jdbc.support.KeyHolder;
-import jakarta.inject.Inject;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.junit5.container.annotation.ArquillianTest;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
@@ -13,7 +12,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
@@ -22,10 +20,16 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.sql.DataSource;
+import jakarta.inject.Inject;
 
 @ArquillianTest
 public class JdbcClientIT {
     private static final Logger LOGGER = Logger.getLogger(JdbcClientIT.class.getName());
+    @Inject
+    private JdbcClient jdbcClient;
+    @Inject
+    private DataSource dataSource;
 
     @Deployment
     public static WebArchive createDeployment() {
@@ -41,12 +45,6 @@ public class JdbcClientIT {
         LOGGER.log(Level.INFO, "deployment archive: {0}", archive.toString(true));
         return archive;
     }
-
-    @Inject
-    private JdbcClient jdbcClient;
-
-    @Inject
-    private DataSource dataSource;
 
     @BeforeEach
     public void setupDatabase() throws Exception {

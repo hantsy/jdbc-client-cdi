@@ -10,6 +10,40 @@ package io.github.hantsy.jdbc;
  */
 public class JdbcClientException extends RuntimeException {
 
+    private final Code code;
+
+    /**
+     * Creates an exception without an underlying cause.
+     *
+     * @param code    failure code
+     * @param message diagnostic message
+     */
+    public JdbcClientException(Code code, String message) {
+        super(message);
+        this.code = code;
+    }
+
+    /**
+     * Creates an exception preserving the underlying cause.
+     *
+     * @param code    failure code
+     * @param message diagnostic message
+     * @param cause   underlying failure
+     */
+    public JdbcClientException(Code code, String message, Throwable cause) {
+        super(message, cause);
+        this.code = code;
+    }
+
+    /**
+     * Returns the stable code for this failure.
+     *
+     * @return failure code
+     */
+    public Code getCode() {
+        return code;
+    }
+
     /**
      * Stable failure codes exposed by {@link JdbcClient}.
      *
@@ -19,13 +53,19 @@ public class JdbcClientException extends RuntimeException {
      * diagnostics.</p>
      */
     public enum Code {
-        /** A failure that does not fit another specific code. */
+        /**
+         * A failure that does not fit another specific code.
+         */
         UNCATEGORIZED,
 
-        /** A JDBC connection, statement, SQL, or result-set operation failed. */
+        /**
+         * A JDBC connection, statement, SQL, or result-set operation failed.
+         */
         JDBC,
 
-        /** A custom row mapper or reflective row-to-object mapping failed. */
+        /**
+         * A custom row mapper or reflective row-to-object mapping failed.
+         */
         MAPPING_FAILURE,
 
         /**
@@ -44,39 +84,5 @@ public class JdbcClientException extends RuntimeException {
          * results and do not produce this code.</p>
          */
         TOO_MANY_RESULTS
-    }
-
-    private final Code code;
-
-    /**
-     * Creates an exception without an underlying cause.
-     *
-     * @param code failure code
-     * @param message diagnostic message
-     */
-    public JdbcClientException(Code code, String message) {
-        super(message);
-        this.code = code;
-    }
-
-    /**
-     * Creates an exception preserving the underlying cause.
-     *
-     * @param code failure code
-     * @param message diagnostic message
-     * @param cause underlying failure
-     */
-    public JdbcClientException(Code code, String message, Throwable cause) {
-        super(message, cause);
-        this.code = code;
-    }
-
-    /**
-     * Returns the stable code for this failure.
-     *
-     * @return failure code
-     */
-    public Code getCode() {
-        return code;
     }
 }

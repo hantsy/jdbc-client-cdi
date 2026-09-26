@@ -4,17 +4,31 @@ import io.github.hantsy.jdbc.converter.Converter;
 import io.github.hantsy.jdbc.converter.ConverterRegistry;
 import io.github.hantsy.jdbc.support.KeyHolder;
 
-import javax.sql.DataSource;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.RecordComponent;
-import java.sql.*;
-import java.util.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.Spliterator;
 import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
+import javax.sql.DataSource;
 
 /**
  * Fluent JDBC client for executing parameterized SQL against a {@link DataSource}.
@@ -77,77 +91,71 @@ public class JdbcClient {
     public JdbcClient() {
     }
 
-
-    /** Sets the data source used by subsequent operations. */
-    public void setDataSource(DataSource dataSource) {
-        this.dataSource = dataSource;
-    }
-
-    /** Sets the registry used for reflective result conversion. */
-    public void setConverterRegistry(ConverterRegistry converterRegistry) {
-        this.converterRegistry = converterRegistry;
-    }
-
-    /** Sets the default statement configuration. */
-    public void setConfig(JdbcConfig config) {
-        this.config = config;
-    }
-
-    /** Starts building a client for the supplied data source. */
+    /**
+     * Starts building a client for the supplied data source.
+     */
     public static Builder builder(DataSource dataSource) {
         return new Builder(dataSource);
     }
 
-    /** Fluent builder for configuring a {@link JdbcClient}. */
-    public static class Builder {
-        private final DataSource dataSource;
-        private ConverterRegistry converters = new ConverterRegistry();
-        private String placeholder = JdbcConfig.DEFAULT.placeholder();
-        private int queryTimeout = JdbcConfig.DEFAULT.queryTimeout();
-        private int fetchSize = JdbcConfig.DEFAULT.fetchSize();
+    /**
+     * Decorates a row mapper so mapping failures use the client's exception contract.
+     *
+     * <p>Existing {@link JdbcClientException} instances are propagated unchanged.
+     * Checked SQL exceptions and other runtime failures from the original mapper
+     * are wrapped as {@link JdbcClientException.Code#MAPPING_FAILURE} while
+     * preserving the original cause.</p>
+     *
+     * @param mapper the original row mapper
+     * @param <T>    mapped result type
+     * @return a mapper that translates failures from the original mapper
+     */
+    private static <T> RowMapper<T> decorateMapper(RowMapper<T> mapper) {
+        return (rs, rowNum) -> {
+            try {
+                return mapper.mapRow(rs, rowNum);
+            } catch (JdbcClientException e) {
+                throw e;
+            } catch (SQLException | RuntimeException e) {
+                throw new JdbcClientException(
+                        JdbcClientException.Code.MAPPING_FAILURE,
+                        "Failed to map result row " + rowNum,
+                        e);
+            }
+        };
+    }
 
-        private Builder(DataSource dataSource) {
-            this.dataSource = dataSource;
+    private static void closeQuietly(AutoCloseable... closeables) {
+        for (AutoCloseable c : closeables) {
+            if (c != null) {
+                try {
+                    c.close();
+                } catch (Exception ignored) {
+                    // ignore close failures
+                }
+            }
         }
+    }
 
-        /** Sets the placeholder style used when named parameters are rewritten. */
-        public Builder placeholder(String placeholder) {
-            this.placeholder = Objects.requireNonNull(placeholder, "placeholder must not be null");
-            return this;
-        }
+    /**
+     * Sets the data source used by subsequent operations.
+     */
+    public void setDataSource(DataSource dataSource) {
+        this.dataSource = dataSource;
+    }
 
-        /** Sets the default prepared-statement timeout in seconds. */
-        public Builder queryTimeout(int queryTimeout) {
-            this.queryTimeout = queryTimeout;
-            return this;
-        }
+    /**
+     * Sets the registry used for reflective result conversion.
+     */
+    public void setConverterRegistry(ConverterRegistry converterRegistry) {
+        this.converterRegistry = converterRegistry;
+    }
 
-        /** Sets the default JDBC fetch-size hint. */
-        public Builder fetchSize(int fetchSize) {
-            this.fetchSize = fetchSize;
-            return this;
-        }
-
-        /** Sets the converter registry used by reflective mapping. */
-        public Builder converters(ConverterRegistry converters) {
-            this.converters = Objects.requireNonNull(converters, "converters must not be null");
-            return this;
-        }
-
-        /** Copies settings from a {@link JdbcConfig}. */
-        public Builder config(JdbcConfig config) {
-            Objects.requireNonNull(config, "config must not be null");
-            this.placeholder = config.placeholder();
-            this.queryTimeout = config.queryTimeout();
-            this.fetchSize = config.fetchSize();
-            return this;
-        }
-
-        /** Builds the configured client. */
-        public JdbcClient build() {
-            return new JdbcClient(dataSource, converters,
-                    new JdbcConfig(placeholder, queryTimeout, fetchSize));
-        }
+    /**
+     * Sets the default statement configuration.
+     */
+    public void setConfig(JdbcConfig config) {
+        this.config = config;
     }
 
     /**
@@ -160,7 +168,127 @@ public class JdbcClient {
         return new SqlSpec(sql);
     }
 
-    /** Represents an SQL statement, its parameters, and statement options. */
+    @FunctionalInterface
+    private interface SQLExecutor<R> {
+        R execute() throws SQLException;
+    }
+
+    @FunctionalInterface
+    private interface SQLResultHandler<R> {
+        R handle(ResultSet rs) throws SQLException;
+    }
+
+    /**
+     * Fluent builder for configuring a {@link JdbcClient}.
+     */
+    public static class Builder {
+        private final DataSource dataSource;
+        private ConverterRegistry converters = new ConverterRegistry();
+        private String placeholder = JdbcConfig.DEFAULT.placeholder();
+        private int queryTimeout = JdbcConfig.DEFAULT.queryTimeout();
+        private int fetchSize = JdbcConfig.DEFAULT.fetchSize();
+
+        private Builder(DataSource dataSource) {
+            this.dataSource = dataSource;
+        }
+
+        /**
+         * Sets the placeholder style used when named parameters are rewritten.
+         */
+        public Builder placeholder(String placeholder) {
+            this.placeholder = Objects.requireNonNull(placeholder, "placeholder must not be null");
+            return this;
+        }
+
+        /**
+         * Sets the default prepared-statement timeout in seconds.
+         */
+        public Builder queryTimeout(int queryTimeout) {
+            this.queryTimeout = queryTimeout;
+            return this;
+        }
+
+        /**
+         * Sets the default JDBC fetch-size hint.
+         */
+        public Builder fetchSize(int fetchSize) {
+            this.fetchSize = fetchSize;
+            return this;
+        }
+
+        /**
+         * Sets the converter registry used by reflective mapping.
+         */
+        public Builder converters(ConverterRegistry converters) {
+            this.converters = Objects.requireNonNull(converters, "converters must not be null");
+            return this;
+        }
+
+        /**
+         * Copies settings from a {@link JdbcConfig}.
+         */
+        public Builder config(JdbcConfig config) {
+            Objects.requireNonNull(config, "config must not be null");
+            this.placeholder = config.placeholder();
+            this.queryTimeout = config.queryTimeout();
+            this.fetchSize = config.fetchSize();
+            return this;
+        }
+
+        /**
+         * Builds the configured client.
+         */
+        public JdbcClient build() {
+            return new JdbcClient(dataSource, converters,
+                    new JdbcConfig(placeholder, queryTimeout, fetchSize));
+        }
+    }
+
+    private record ParsedSql(String jdbcSql, List<String> orderedParamNames) {
+    }
+
+    private static class ResultSetSpliterator<T> implements Spliterator<T> {
+        private final ResultSet rs;
+        private final RowMapper<T> mapper;
+        private int rowNum = 0;
+
+        ResultSetSpliterator(ResultSet rs, RowMapper<T> mapper) {
+            this.rs = rs;
+            this.mapper = mapper;
+        }
+
+        @Override
+        public boolean tryAdvance(Consumer<? super T> action) {
+            try {
+                if (rs.next()) {
+                    action.accept(mapper.mapRow(rs, rowNum++));
+                    return true;
+                }
+                return false;
+            } catch (SQLException e) {
+                throw new JdbcClientException(JdbcClientException.Code.JDBC, e.getMessage(), e);
+            }
+        }
+
+        @Override
+        public Spliterator<T> trySplit() {
+            return null;
+        }
+
+        @Override
+        public long estimateSize() {
+            return Long.MAX_VALUE;
+        }
+
+        @Override
+        public int characteristics() {
+            return ORDERED | NONNULL | IMMUTABLE;
+        }
+    }
+
+    /**
+     * Represents an SQL statement, its parameters, and statement options.
+     */
     public class SqlSpec {
         private final String rawSql;
         private final Map<String, Object> namedParams = new HashMap<>();
@@ -202,7 +330,7 @@ public class JdbcClient {
         /**
          * Adds one named parameter matching a {@code :name} placeholder.
          *
-         * @param name parameter name
+         * @param name  parameter name
          * @param value parameter value
          * @return this statement
          * @throws IllegalArgumentException if positional parameters were already added
@@ -279,7 +407,7 @@ public class JdbcClient {
          * Queries rows and maps them to a record, POJO, or scalar type.
          *
          * @param clazz target mapping type
-         * @param <T> result type
+         * @param <T>   result type
          * @return a query specification
          */
         public <T> QuerySpec<T> query(Class<T> clazz) {
@@ -297,7 +425,7 @@ public class JdbcClient {
          * }</pre>
          *
          * @param rowMapper mapper for each current result-set row
-         * @param <T> result type
+         * @param <T>       result type
          * @return a query specification
          */
         public <T> QuerySpec<T> query(RowMapper<T> rowMapper) {
@@ -308,10 +436,10 @@ public class JdbcClient {
          * Reads exactly one scalar value from the first column of one row.
          *
          * @param clazz scalar target type
-         * @param <T> scalar type
+         * @param <T>   scalar type
          * @return the scalar value
          * @throws JdbcClientException with {@link JdbcClientException.Code#NO_RESULT}
-         *         if no row exists
+         *                             if no row exists
          */
         public <T> T singleValue(Class<T> clazz) {
             return optionalValue(clazz)
@@ -324,7 +452,7 @@ public class JdbcClient {
          * Reads at most one scalar value from the first column.
          *
          * @param clazz scalar target type
-         * @param <T> scalar type
+         * @param <T>   scalar type
          * @return the value, or empty when no row exists
          */
         public <T> Optional<T> optionalValue(Class<T> clazz) {
@@ -430,118 +558,6 @@ public class JdbcClient {
             });
         }
 
-        /**
-         * Provides terminal operations for a mapped query.
-         *
-         * @param <T> mapped result type
-         */
-        public class QuerySpec<T> {
-            private final RowMapper<T> rowMapper;
-
-            /**
-             * Creates a query specification using the supplied mapper.
-             *
-             * @param rowMapper mapper for each result-set row
-             */
-            public QuerySpec(RowMapper<T> rowMapper) {
-                this.rowMapper = decorateMapper(rowMapper);
-            }
-
-            /** Returns every mapped row as a list. */
-            public List<T> list() {
-                ParsedSql parsed = parseSql(rawSql);
-                return executeQuery(parsed, rs -> {
-                    List<T> results = new ArrayList<>();
-                    int rowNum = 0;
-                    while (rs.next()) {
-                        results.add(rowMapper.mapRow(rs, rowNum++));
-                    }
-                    return results;
-                });
-            }
-
-            /**
-             * Returns exactly one mapped row.
-             *
-             * @throws JdbcClientException with {@link JdbcClientException.Code#NO_RESULT}
-             *         if zero or multiple rows exist
-             */
-            public T single() {
-                ParsedSql parsed = parseSql(rawSql);
-                return executeQuery(parsed, rs -> {
-                    if (!rs.next()) {
-                        throw new JdbcClientException(
-                                JdbcClientException.Code.NO_RESULT,
-                                "Expected exactly 1 row but got 0");
-                    }
-                    T result = rowMapper.mapRow(rs, 0);
-                    if (rs.next()) {
-                        throw new JdbcClientException(
-                                JdbcClientException.Code.TOO_MANY_RESULTS,
-                                "Expected exactly 1 row but got more than 1");
-                    }
-                    return result;
-                });
-            }
-
-            /**
-             * Returns zero or one mapped row.
-             *
-             * @throws JdbcClientException with {@link JdbcClientException.Code#TOO_MANY_RESULTS}
-             *         if multiple rows exist
-             */
-            public Optional<T> optional() {
-                ParsedSql parsed = parseSql(rawSql);
-                return executeQuery(parsed, rs -> {
-                    if (!rs.next()) {
-                        return Optional.empty();
-                    }
-                    T result = rowMapper.mapRow(rs, 0);
-                    if (rs.next()) {
-                        throw new JdbcClientException(
-                                JdbcClientException.Code.TOO_MANY_RESULTS,
-                                "Expected at most 1 row but got more than 1");
-                    }
-                    return Optional.of(result);
-                });
-            }
-
-            /**
-             * Streams mapped rows.
-             *
-             * <p>Close the returned stream to release its JDBC resources,
-             * preferably with try-with-resources.</p>
-             *
-             * @return a sequential stream of mapped rows
-             */
-            public Stream<T> stream() {
-                ParsedSql parsed = parseSql(rawSql);
-                Connection conn = null;
-                PreparedStatement ps = null;
-                ResultSet rs = null;
-                boolean opened = false;
-                try {
-                    conn = dataSource.getConnection();
-                    ps = conn.prepareStatement(parsed.jdbcSql);
-                    applyStatementHints(ps);
-                    bindParameters(ps, parsed.orderedParamNames);
-                    rs = ps.executeQuery();
-                    opened = true;
-                    final Connection c = conn;
-                    final PreparedStatement s = ps;
-                    final ResultSet r = rs;
-                    return StreamSupport.stream(new ResultSetSpliterator<>(r, rowMapper), false)
-                            .onClose(() -> closeQuietly(r, s, c));
-                } catch (SQLException e) {
-                throw new JdbcClientException(JdbcClientException.Code.JDBC, e.getMessage(), e);
-                } finally {
-                    if (!opened) {
-                        closeQuietly(rs, ps, conn);
-                    }
-                }
-            }
-        }
-
         private <R> R execute(SQLExecutor<R> executor) {
             try {
                 return executor.execute();
@@ -637,33 +653,120 @@ public class JdbcClient {
             return new ParsedSql(sb.toString(), parameterNames);
         }
 
-    }
+        /**
+         * Provides terminal operations for a mapped query.
+         *
+         * @param <T> mapped result type
+         */
+        public class QuerySpec<T> {
+            private final RowMapper<T> rowMapper;
 
-    /**
-     * Decorates a row mapper so mapping failures use the client's exception contract.
-     *
-     * <p>Existing {@link JdbcClientException} instances are propagated unchanged.
-     * Checked SQL exceptions and other runtime failures from the original mapper
-     * are wrapped as {@link JdbcClientException.Code#MAPPING_FAILURE} while
-     * preserving the original cause.</p>
-     *
-     * @param mapper the original row mapper
-     * @param <T> mapped result type
-     * @return a mapper that translates failures from the original mapper
-     */
-    private static <T> RowMapper<T> decorateMapper(RowMapper<T> mapper) {
-        return (rs, rowNum) -> {
-            try {
-                return mapper.mapRow(rs, rowNum);
-            } catch (JdbcClientException e) {
-                throw e;
-            } catch (SQLException | RuntimeException e) {
-                throw new JdbcClientException(
-                        JdbcClientException.Code.MAPPING_FAILURE,
-                        "Failed to map result row " + rowNum,
-                        e);
+            /**
+             * Creates a query specification using the supplied mapper.
+             *
+             * @param rowMapper mapper for each result-set row
+             */
+            public QuerySpec(RowMapper<T> rowMapper) {
+                this.rowMapper = decorateMapper(rowMapper);
             }
-        };
+
+            /**
+             * Returns every mapped row as a list.
+             */
+            public List<T> list() {
+                ParsedSql parsed = parseSql(rawSql);
+                return executeQuery(parsed, rs -> {
+                    List<T> results = new ArrayList<>();
+                    int rowNum = 0;
+                    while (rs.next()) {
+                        results.add(rowMapper.mapRow(rs, rowNum++));
+                    }
+                    return results;
+                });
+            }
+
+            /**
+             * Returns exactly one mapped row.
+             *
+             * @throws JdbcClientException with {@link JdbcClientException.Code#NO_RESULT}
+             *                             if zero or multiple rows exist
+             */
+            public T single() {
+                ParsedSql parsed = parseSql(rawSql);
+                return executeQuery(parsed, rs -> {
+                    if (!rs.next()) {
+                        throw new JdbcClientException(
+                                JdbcClientException.Code.NO_RESULT,
+                                "Expected exactly 1 row but got 0");
+                    }
+                    T result = rowMapper.mapRow(rs, 0);
+                    if (rs.next()) {
+                        throw new JdbcClientException(
+                                JdbcClientException.Code.TOO_MANY_RESULTS,
+                                "Expected exactly 1 row but got more than 1");
+                    }
+                    return result;
+                });
+            }
+
+            /**
+             * Returns zero or one mapped row.
+             *
+             * @throws JdbcClientException with {@link JdbcClientException.Code#TOO_MANY_RESULTS}
+             *                             if multiple rows exist
+             */
+            public Optional<T> optional() {
+                ParsedSql parsed = parseSql(rawSql);
+                return executeQuery(parsed, rs -> {
+                    if (!rs.next()) {
+                        return Optional.empty();
+                    }
+                    T result = rowMapper.mapRow(rs, 0);
+                    if (rs.next()) {
+                        throw new JdbcClientException(
+                                JdbcClientException.Code.TOO_MANY_RESULTS,
+                                "Expected at most 1 row but got more than 1");
+                    }
+                    return Optional.of(result);
+                });
+            }
+
+            /**
+             * Streams mapped rows.
+             *
+             * <p>Close the returned stream to release its JDBC resources,
+             * preferably with try-with-resources.</p>
+             *
+             * @return a sequential stream of mapped rows
+             */
+            public Stream<T> stream() {
+                ParsedSql parsed = parseSql(rawSql);
+                Connection conn = null;
+                PreparedStatement ps = null;
+                ResultSet rs = null;
+                boolean opened = false;
+                try {
+                    conn = dataSource.getConnection();
+                    ps = conn.prepareStatement(parsed.jdbcSql);
+                    applyStatementHints(ps);
+                    bindParameters(ps, parsed.orderedParamNames);
+                    rs = ps.executeQuery();
+                    opened = true;
+                    final Connection c = conn;
+                    final PreparedStatement s = ps;
+                    final ResultSet r = rs;
+                    return StreamSupport.stream(new ResultSetSpliterator<>(r, rowMapper), false)
+                            .onClose(() -> closeQuietly(r, s, c));
+                } catch (SQLException e) {
+                    throw new JdbcClientException(JdbcClientException.Code.JDBC, e.getMessage(), e);
+                } finally {
+                    if (!opened) {
+                        closeQuietly(rs, ps, conn);
+                    }
+                }
+            }
+        }
+
     }
 
     private class TypedRowMapper<T> implements RowMapper<T> {
@@ -825,70 +928,6 @@ public class JdbcClient {
                 return ts.toInstant().atOffset(java.time.ZoneOffset.UTC);
             }
             return ts;
-        }
-    }
-
-    private record ParsedSql(String jdbcSql, List<String> orderedParamNames) {
-    }
-
-    @FunctionalInterface
-    private interface SQLExecutor<R> {
-        R execute() throws SQLException;
-    }
-
-    @FunctionalInterface
-    private interface SQLResultHandler<R> {
-        R handle(ResultSet rs) throws SQLException;
-    }
-
-    private static class ResultSetSpliterator<T> implements Spliterator<T> {
-        private final ResultSet rs;
-        private final RowMapper<T> mapper;
-        private int rowNum = 0;
-
-        ResultSetSpliterator(ResultSet rs, RowMapper<T> mapper) {
-            this.rs = rs;
-            this.mapper = mapper;
-        }
-
-        @Override
-        public boolean tryAdvance(Consumer<? super T> action) {
-            try {
-                if (rs.next()) {
-                    action.accept(mapper.mapRow(rs, rowNum++));
-                    return true;
-                }
-                return false;
-            } catch (SQLException e) {
-                throw new JdbcClientException(JdbcClientException.Code.JDBC, e.getMessage(), e);
-            }
-        }
-
-        @Override
-        public Spliterator<T> trySplit() {
-            return null;
-        }
-
-        @Override
-        public long estimateSize() {
-            return Long.MAX_VALUE;
-        }
-
-        @Override
-        public int characteristics() {
-            return ORDERED | NONNULL | IMMUTABLE;
-        }
-    }
-
-    private static void closeQuietly(AutoCloseable... closeables) {
-        for (AutoCloseable c : closeables) {
-            if (c != null) {
-                try {
-                    c.close();
-                } catch (Exception ignored) {
-                    // ignore close failures
-                }
-            }
         }
     }
 }

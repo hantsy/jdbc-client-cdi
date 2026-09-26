@@ -1,10 +1,12 @@
 # Quickstart
 
-The fastest path to using the library is to construct a `JdbcClient` from a `DataSource` and start composing fluent SQL with strongly typed results.
+The fastest path to using the library is to construct a `JdbcClient` from a `DataSource` and start composing fluent SQL
+with strongly typed results.
 
 ## Creating `JdbcClient`
 
-After `jdbc-client-core` has been added to the project dependencies, a `JdbcClient` can be created directly from a `DataSource`:
+After `jdbc-client-core` has been added to the project dependencies, a `JdbcClient` can be created directly from a
+`DataSource`:
 
 ```java
 import io.github.hantsy.jdbc.JdbcClient;
@@ -28,7 +30,8 @@ JdbcClient client = JdbcClient.builder(dataSource)
 
 See [configuration](configuration.md) for the full list of available defaults and options.
 
-In a Jakarta EE/CDI environment, CDI can create and inject the client. Add `jdbc-client-cdi` and `jdbc-client-config`, then expose a `DataSource` as a bean:
+In a Jakarta EE/CDI environment, CDI can create and inject the client. Add `jdbc-client-cdi` and `jdbc-client-config`,
+then expose a `DataSource` as a bean:
 
 ```java
 @ApplicationScoped
@@ -53,7 +56,8 @@ The `JdbcClient` is then available for injection:
 
 ## Executing queries
 
-Once the client is available, the fluent SQL API can be used for both reading and writing data. The library supports both named and positional parameters in a single SQL statement.
+Once the client is available, the fluent SQL API can be used for both reading and writing data. The library supports
+both named and positional parameters in a single SQL statement.
 
 Use named parameters with `param(...)`:
 
