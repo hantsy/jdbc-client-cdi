@@ -10,6 +10,13 @@ The project is organized into three modules:
 - `jdbc-client-config`: optional MicroProfile Config integration.
 - `jdbc-client-cdi`: CDI producers for `JdbcClient` and converters.
 
+The `examples` directory holds runnable examples (excluded from the main build):
+
+- `examples/vanilla`: plain (no CDI) usage of the core module.
+- `examples/javase`: core + CDI, bootstrapped with Weld SE.
+- `examples/servlet`: core + CDI in a Servlet container (Tomcat 11 + Weld).
+- `examples/jakartaee`: core + CDI + JAX-RS on GlassFish / WildFly.
+
 Start with the [reference documentation](https://hantsy.github.io/jdbc-client-cdi/) for installation, usage patterns,
 and configuration details.
 
@@ -28,24 +35,49 @@ Clone the repository:
 git clone https://github.com/hantsy/jdbc-client-cdi.git
 ```
 
-Build all modules and run the unit tests (integration tests are skipped by default):
+Build all modules and run the unit tests:
 
 ```bash
 cd jdbc-client-cdi
 ./mvnw clean install
 ```
 
-Run the Arquillian integration tests on GlassFish, which downloads and boots GlassFish 8:
+### Building the examples
+
+The examples are excluded from the main reactor and build separately. Install the
+main modules first, then build each example:
 
 ```bash
-./mvnw -pl integration-tests -Parq-glassfish-managed verify
+./mvnw install -DskipTests
+
+# vanilla (core only)
+./mvnw -f examples/pom.xml -pl vanilla verify
+
+# javase (core + CDI via Weld SE)
+./mvnw -f examples/pom.xml -pl javase verify
+
+# servlet (Arquillian integration tests on embedded Tomcat 11)
+./mvnw -f examples/pom.xml -pl servlet -Parq-tomcat-embedded verify
+
+# jakartaee (Arquillian integration tests; requires PostgreSQL on localhost:5432)
+./mvnw -f examples/pom.xml -pl jakartaee -Parq-glassfish-managed verify
+./mvnw -f examples/pom.xml -pl jakartaee -Parq-wildfly-managed verify
 ```
 
-Run the Arquillian integration tests on WildFly, which downloads and boots WildFly 41:
+Run the applications locally:
 
 ```bash
-./mvnw -pl integration-tests -Parq-wildfly-managed verify
+# jakartaee on GlassFish 8
+./mvnw -f examples/pom.xml -pl jakartaee -Pglassfish clean package cargo:run
+
+# jakartaee on WildFly 41
+./mvnw -f examples/pom.xml -pl jakartaee -Pwildfly clean package wildfly:run
+
+# servlet on embedded Tomcat 11
+./mvnw -f examples/pom.xml -pl servlet -Pcargo-run clean package cargo:run
 ```
+
+The `vanilla` and `javase` examples expose a `main` method that can be run from your IDE.
 
 ### Building the documentation
 
