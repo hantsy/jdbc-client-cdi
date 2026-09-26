@@ -15,6 +15,7 @@ configuration integrations are for Jakarta EE-compatible runtimes.
 Use the following dependency when only the core fluent `JdbcClient` API is required:
 
 ```xml
+
 <dependency>
     <groupId>io.github.hantsy.jdbc</groupId>
     <artifactId>jdbc-client-core</artifactId>
@@ -30,6 +31,7 @@ runtime environment.
 For a CDI-managed `JdbcClient`, add the CDI artifact:
 
 ```xml
+
 <dependency>
     <groupId>io.github.hantsy.jdbc</groupId>
     <artifactId>jdbc-client-cdi</artifactId>
@@ -44,6 +46,7 @@ This artifact depends on the core module and is intended for a Jakarta EE 11 run
 To configure the library from MicroProfile Config properties, add the optional configuration module:
 
 ```xml
+
 <dependency>
     <groupId>io.github.hantsy.jdbc</groupId>
     <artifactId>jdbc-client-config</artifactId>

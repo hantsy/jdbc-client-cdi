@@ -1,0 +1,118 @@
+name: Examples
+
+on:
+  push:
+    branches: [ master ]
+    paths:
+      - 'examples/**'
+      - '.github/workflows/examples.yml'
+  pull_request:
+    branches: [ master ]
+    paths:
+      - 'examples/**'
+      - '.github/workflows/examples.yml'
+  workflow_dispatch:
+
+jobs:
+  vanilla:
+    name: Vanilla (core)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-java@v6
+        with:
+          java-version: '21'
+          distribution: temurin
+          cache: maven
+      - name: Install main modules
+        run: mvn -B -ntp install -DskipTests
+      - name: Build vanilla example
+        run: mvn -B -ntp -f examples/pom.xml -pl vanilla verify
+
+  javase:
+    name: Java SE (core + CDI, Weld SE)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-java@v6
+        with:
+          java-version: '21'
+          distribution: temurin
+          cache: maven
+      - name: Install main modules
+        run: mvn -B -ntp install -DskipTests
+      - name: Build javase example
+        run: mvn -B -ntp -f examples/pom.xml -pl javase verify
+
+  servlet:
+    name: Servlet (Tomcat 11 + Weld)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-java@v6
+        with:
+          java-version: '21'
+          distribution: temurin
+          cache: maven
+      - name: Install main modules
+        run: mvn -B -ntp install -DskipTests
+      - name: Run servlet ITs on embedded Tomcat
+        run: mvn -B -ntp -f examples/pom.xml -pl servlet -Parq-tomcat-embedded verify
+
+  jakartaee-glassfish:
+    name: Jakarta EE (GlassFish)
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-java@v6
+        with:
+          java-version: '21'
+          distribution: temurin
+          cache: maven
+      - name: Install main modules
+        run: mvn -B -ntp install -DskipTests
+      - name: Run GlassFish integration tests
+        run: mvn -B -ntp -f examples/pom.xml -pl jakartaee -Parq-glassfish-managed verify
+
+  jakartaee-wildfly:
+    name: Jakarta EE (WildFly)
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-java@v6
+        with:
+          java-version: '21'
+          distribution: temurin
+          cache: maven
+      - name: Install main modules
+        run: mvn -B -ntp install -DskipTests
+      - name: Run WildFly integration tests
+        run: mvn -B -ntp -f examples/pom.xml -pl jakartaee -Parq-wildfly-managed verify

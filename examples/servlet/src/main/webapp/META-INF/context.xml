@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Tomcat reads this webapp-specific context and registers the DataSource under java:comp/env/jdbc/myDS. -->
+<Context>
+    <Resource name="jdbc/myDS"
+              auth="Container"
+              type="javax.sql.DataSource"
+              driverClassName="org.h2.Driver"
+              url="jdbc:h2:mem:servlet;DB_CLOSE_DELAY=-1"
+              username="sa"
+              password=""
+              maxTotal="8"
+              maxIdle="4"/>
+</Context>
