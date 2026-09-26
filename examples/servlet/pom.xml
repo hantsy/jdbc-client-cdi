@@ -128,9 +128,9 @@
         </profile>
 
         <!-- Run the application on embedded Tomcat 11:
-             mvn -f examples/pom.xml -pl servlet -Pcargo-run clean package cargo:run -->
+             mvn -f examples/pom.xml -pl servlet -Ptomcat-embedded clean package cargo:run -->
         <profile>
-            <id>cargo-run</id>
+            <id>tomcat-embedded</id>
             <build>
                 <plugins>
                     <plugin>
