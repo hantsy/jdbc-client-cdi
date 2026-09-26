@@ -75,7 +75,7 @@ Run the applications locally:
 ./mvnw -f examples/pom.xml -pl jakartaee -Pwildfly clean package wildfly:run
 
 # servlet on embedded Tomcat 11
-./mvnw -f examples/pom.xml -pl servlet -Pcargo-run clean package cargo:run
+./mvnw -f examples/pom.xml -pl servlet -Ptomcat-embedded clean package cargo:run
 ```
 
 The `vanilla` and `javase` examples expose a `main` method that can be run from your IDE.

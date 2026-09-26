@@ -58,7 +58,7 @@ method that can be run from your IDE.
 
 ```bash
 # servlet on embedded Tomcat 11 (servlet mapped at /engineers)
-./mvnw -f examples/pom.xml -pl servlet -Pcargo-run clean package cargo:run
+./mvnw -f examples/pom.xml -pl servlet -Ptomcat-embedded clean package cargo:run
 
 # jakartaee on GlassFish 8 (JAX-RS resource at /api/engineers)
 ./mvnw -f examples/pom.xml -pl jakartaee -Pglassfish clean package cargo:run
