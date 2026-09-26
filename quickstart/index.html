@@ -617,9 +617,11 @@
 
 
 <h1 id="quickstart">Quickstart<a class="headerlink" href="#quickstart" title="Permanent link">&para;</a></h1>
-<p>The fastest path to using the library is to construct a <code>JdbcClient</code> from a <code>DataSource</code> and start composing fluent SQL with strongly typed results.</p>
+<p>The fastest path to using the library is to construct a <code>JdbcClient</code> from a <code>DataSource</code> and start composing fluent SQL
+with strongly typed results.</p>
 <h2 id="creating-jdbcclient">Creating <code>JdbcClient</code><a class="headerlink" href="#creating-jdbcclient" title="Permanent link">&para;</a></h2>
-<p>After <code>jdbc-client-core</code> has been added to the project dependencies, a <code>JdbcClient</code> can be created directly from a <code>DataSource</code>:</p>
+<p>After <code>jdbc-client-core</code> has been added to the project dependencies, a <code>JdbcClient</code> can be created directly from a
+<code>DataSource</code>:</p>
 <div class="language-java highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">io.github.hantsy.jdbc.JdbcClient</span><span class="p">;</span>
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="kn">import</span><span class="w"> </span><span class="nn">javax.sql.DataSource</span><span class="p">;</span>
 </span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>
@@ -636,7 +638,8 @@
 </span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="w">        </span><span class="p">.</span><span class="na">build</span><span class="p">();</span>
 </span></code></pre></div>
 <p>See <a href="../configuration/">configuration</a> for the full list of available defaults and options.</p>
-<p>In a Jakarta EE/CDI environment, CDI can create and inject the client. Add <code>jdbc-client-cdi</code> and <code>jdbc-client-config</code>, then expose a <code>DataSource</code> as a bean:</p>
+<p>In a Jakarta EE/CDI environment, CDI can create and inject the client. Add <code>jdbc-client-cdi</code> and <code>jdbc-client-config</code>,
+then expose a <code>DataSource</code> as a bean:</p>
 <div class="language-java highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="nd">@ApplicationScoped</span>
 </span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">TestDataSourceProducer</span><span class="w"> </span><span class="p">{</span>
 </span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>
@@ -654,7 +657,8 @@
 <div class="language-java highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="nd">@Inject</span><span class="w"> </span><span class="n">JdbcClient</span><span class="w"> </span><span class="n">client</span><span class="p">;</span>
 </span></code></pre></div>
 <h2 id="executing-queries">Executing queries<a class="headerlink" href="#executing-queries" title="Permanent link">&para;</a></h2>
-<p>Once the client is available, the fluent SQL API can be used for both reading and writing data. The library supports both named and positional parameters in a single SQL statement.</p>
+<p>Once the client is available, the fluent SQL API can be used for both reading and writing data. The library supports
+both named and positional parameters in a single SQL statement.</p>
 <p>Use named parameters with <code>param(...)</code>:</p>
 <div class="language-java highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="n">List</span><span class="o">&lt;</span><span class="n">DevSummary</span><span class="o">&gt;</span><span class="w"> </span><span class="n">devs</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">client</span>
 </span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="w">        </span><span class="p">.</span><span class="na">sql</span><span class="p">(</span><span class="s">"SELECT id, dev_name FROM engineers WHERE id = :id"</span><span class="p">)</span>
@@ -693,7 +697,7 @@
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="September 22, 2026 08:57:58 UTC">September 22, 2026</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="September 26, 2026 11:17:05 UTC">September 26, 2026</span>
   </span>
 
     
