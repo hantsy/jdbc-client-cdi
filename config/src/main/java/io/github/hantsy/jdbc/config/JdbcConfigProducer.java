@@ -1,9 +1,11 @@
 package io.github.hantsy.jdbc.config;
 
 import io.github.hantsy.jdbc.JdbcConfig;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Produces;
 import jakarta.inject.Inject;
+
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 /**

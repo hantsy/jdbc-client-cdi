@@ -14,10 +14,11 @@ public class ConverterRegistry {
 
     private final Map<ConversionKey, Converter<?, ?>> matrix = new HashMap<>();
 
-    public record ConversionKey(Class<?> sourceType, Class<?> targetType) {}
+    public record ConversionKey(Class<?> sourceType, Class<?> targetType) {
+    }
 
     public <S, T> ConverterRegistry register(Class<S> sourceType, Class<T> targetType,
-            Converter<S, T> converter) {
+                                             Converter<S, T> converter) {
         Objects.requireNonNull(sourceType, "sourceType must not be null");
         Objects.requireNonNull(targetType, "targetType must not be null");
         Objects.requireNonNull(converter, "converter must not be null");

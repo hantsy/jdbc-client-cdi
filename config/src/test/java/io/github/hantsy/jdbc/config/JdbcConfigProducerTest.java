@@ -2,7 +2,9 @@ package io.github.hantsy.jdbc.config;
 
 import io.github.hantsy.jdbc.JdbcConfig;
 import io.smallrye.config.inject.ConfigExtension;
+
 import jakarta.inject.Inject;
+
 import org.jboss.weld.junit5.auto.AddBeanClasses;
 import org.jboss.weld.junit5.auto.AddExtensions;
 import org.jboss.weld.junit5.auto.EnableAutoWeld;

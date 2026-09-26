@@ -20,7 +20,9 @@ public interface KeyHolder {
      */
     Object getKey();
 
-    /** The generated keys of the first row, keyed by column label. */
+    /**
+     * The generated keys of the first row, keyed by column label.
+     */
     Map<String, Object> getKeys();
 
     /**

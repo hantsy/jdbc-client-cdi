@@ -2,6 +2,7 @@ package io.github.hantsy.jdbc;
 
 import io.github.hantsy.jdbc.support.GeneratedKeyHolder;
 import io.github.hantsy.jdbc.support.KeyHolder;
+
 import jakarta.inject.Inject;
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -12,6 +13,7 @@ import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.sql.DataSource;
+
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.junit5.container.annotation.ArquillianTest;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
@@ -51,7 +53,7 @@ public class JdbcClientIT {
     @BeforeEach
     public void setupDatabase() throws Exception {
         try (Connection conn = dataSource.getConnection();
-                Statement stmt = conn.createStatement()) {
+             Statement stmt = conn.createStatement()) {
             stmt.execute("DROP TABLE IF EXISTS engineers");
             stmt.execute("CREATE TABLE engineers (id BIGINT PRIMARY KEY, dev_name VARCHAR(255))");
             stmt.execute("INSERT INTO engineers VALUES (1, 'Duke Jakarta')");
@@ -264,8 +266,8 @@ public class JdbcClientIT {
     public void dataSourceInjectionSelectOne() throws Exception {
         Assertions.assertNotNull(dataSource);
         try (Connection conn = dataSource.getConnection();
-                Statement stmt = conn.createStatement();
-                ResultSet rs = stmt.executeQuery("SELECT 1")) {
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery("SELECT 1")) {
             Assertions.assertTrue(rs.next());
             Assertions.assertEquals(1, rs.getInt(1));
         }

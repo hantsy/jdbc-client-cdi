@@ -79,9 +79,9 @@ public class JdbcClientSmokeTest {
     public void singleThrowsWhenEmpty() {
         JdbcClientException exception = Assertions.assertThrows(JdbcClientException.class,
                 () -> jdbcClient.sql("SELECT id, dev_name FROM engineers WHERE id = :id")
-                                .param("id", 999L)
-                                .query(DevSummary.class)
-                                .single());
+                        .param("id", 999L)
+                        .query(DevSummary.class)
+                        .single());
         Assertions.assertEquals(Code.NO_RESULT, exception.getCode());
     }
 
@@ -89,8 +89,8 @@ public class JdbcClientSmokeTest {
     public void singleThrowsWhenMany() {
         Assertions.assertThrows(JdbcClientException.class,
                 () -> jdbcClient.sql("SELECT id, dev_name FROM engineers")
-                                .query(DevSummary.class)
-                                .single());
+                        .query(DevSummary.class)
+                        .single());
     }
 
     @Test
@@ -153,10 +153,10 @@ public class JdbcClientSmokeTest {
     public void mapperFailureIsCategorized() {
         JdbcClientException exception = Assertions.assertThrows(JdbcClientException.class,
                 () -> jdbcClient.sql("SELECT id FROM engineers")
-                                .query((rs, rowNum) -> {
-                                    throw new SQLException("mapping failed");
-                                })
-                                .list());
+                        .query((rs, rowNum) -> {
+                            throw new SQLException("mapping failed");
+                        })
+                        .list());
 
         Assertions.assertEquals(Code.MAPPING_FAILURE, exception.getCode());
         Assertions.assertInstanceOf(SQLException.class, exception.getCause());
@@ -221,8 +221,8 @@ public class JdbcClientSmokeTest {
     public void generatedKeys() {
         GeneratedKeyHolder keys = new GeneratedKeyHolder();
         int rows = jdbcClient.sql("INSERT INTO engineers_gen (dev_name) VALUES (:name)")
-                             .param("name", "New Dev")
-                             .update(keys);
+                .param("name", "New Dev")
+                .update(keys);
         Assertions.assertEquals(1, rows);
         Assertions.assertNotNull(keys.getKey());
         Assertions.assertTrue(((Number) keys.getKey()).longValue() > 0);
@@ -255,7 +255,7 @@ public class JdbcClientSmokeTest {
     public void mixingThrows() {
         Assertions.assertThrows(IllegalArgumentException.class,
                 () -> jdbcClient.sql("SELECT id, dev_name FROM engineers WHERE id = :id")
-                                .param("id", 1L)
-                                .param(1L));
+                        .param("id", 1L)
+                        .param(1L));
     }
 }

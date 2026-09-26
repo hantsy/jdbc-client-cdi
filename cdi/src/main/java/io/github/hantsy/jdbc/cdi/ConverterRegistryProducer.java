@@ -2,6 +2,7 @@ package io.github.hantsy.jdbc.cdi;
 
 import io.github.hantsy.jdbc.converter.Converter;
 import io.github.hantsy.jdbc.converter.ConverterRegistry;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;

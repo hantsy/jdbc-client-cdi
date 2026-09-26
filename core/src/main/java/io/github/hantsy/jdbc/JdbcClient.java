@@ -102,29 +102,40 @@ public class JdbcClient {
      * #JdbcClient(DataSource)} or {@link #builder(DataSource)} for normal
      * construction.
      */
-    public JdbcClient() {}
+    public JdbcClient() {
+    }
 
-    /** Sets the data source used by subsequent operations. */
+    /**
+     * Sets the data source used by subsequent operations.
+     */
     public void setDataSource(DataSource dataSource) {
         this.dataSource = dataSource;
     }
 
-    /** Sets the registry used for reflective result conversion. */
+    /**
+     * Sets the registry used for reflective result conversion.
+     */
     public void setConverterRegistry(ConverterRegistry converterRegistry) {
         this.converterRegistry = converterRegistry;
     }
 
-    /** Sets the default statement configuration. */
+    /**
+     * Sets the default statement configuration.
+     */
     public void setConfig(JdbcConfig config) {
         this.config = config;
     }
 
-    /** Starts building a client for the supplied data source. */
+    /**
+     * Starts building a client for the supplied data source.
+     */
     public static Builder builder(DataSource dataSource) {
         return new Builder(dataSource);
     }
 
-    /** Fluent builder for configuring a {@link JdbcClient}. */
+    /**
+     * Fluent builder for configuring a {@link JdbcClient}.
+     */
     public static class Builder {
         private final DataSource dataSource;
         private ConverterRegistry converters = new ConverterRegistry();
@@ -136,31 +147,41 @@ public class JdbcClient {
             this.dataSource = dataSource;
         }
 
-        /** Sets the placeholder style used when named parameters are rewritten. */
+        /**
+         * Sets the placeholder style used when named parameters are rewritten.
+         */
         public Builder placeholder(String placeholder) {
             this.placeholder = Objects.requireNonNull(placeholder, "placeholder must not be null");
             return this;
         }
 
-        /** Sets the default prepared-statement timeout in seconds. */
+        /**
+         * Sets the default prepared-statement timeout in seconds.
+         */
         public Builder queryTimeout(int queryTimeout) {
             this.queryTimeout = queryTimeout;
             return this;
         }
 
-        /** Sets the default JDBC fetch-size hint. */
+        /**
+         * Sets the default JDBC fetch-size hint.
+         */
         public Builder fetchSize(int fetchSize) {
             this.fetchSize = fetchSize;
             return this;
         }
 
-        /** Sets the converter registry used by reflective mapping. */
+        /**
+         * Sets the converter registry used by reflective mapping.
+         */
         public Builder converters(ConverterRegistry converters) {
             this.converters = Objects.requireNonNull(converters, "converters must not be null");
             return this;
         }
 
-        /** Copies settings from a {@link JdbcConfig}. */
+        /**
+         * Copies settings from a {@link JdbcConfig}.
+         */
         public Builder config(JdbcConfig config) {
             Objects.requireNonNull(config, "config must not be null");
             this.placeholder = config.placeholder();
@@ -169,7 +190,9 @@ public class JdbcClient {
             return this;
         }
 
-        /** Builds the configured client. */
+        /**
+         * Builds the configured client.
+         */
         public JdbcClient build() {
             return new JdbcClient(dataSource, converters, new JdbcConfig(placeholder, queryTimeout, fetchSize));
         }
@@ -185,7 +208,9 @@ public class JdbcClient {
         return new SqlSpec(sql);
     }
 
-    /** Represents an SQL statement, its parameters, and statement options. */
+    /**
+     * Represents an SQL statement, its parameters, and statement options.
+     */
     public class SqlSpec {
         private final String rawSql;
         private final Map<String, Object> namedParams = new HashMap<>();
@@ -227,11 +252,11 @@ public class JdbcClient {
         /**
          * Adds one named parameter matching a {@code :name} placeholder.
          *
-         * @param name parameter name
+         * @param name  parameter name
          * @param value parameter value
          * @return this statement
          * @throws IllegalArgumentException if positional parameters were
-         *     already added
+         *                                  already added
          */
         public SqlSpec param(String name, Object value) {
             if (!positionalParams.isEmpty()) {
@@ -262,7 +287,7 @@ public class JdbcClient {
          * @param values parameter names and values
          * @return this statement
          * @throws IllegalArgumentException if positional parameters were
-         *     already added
+         *                                  already added
          */
         public SqlSpec params(Map<String, ?> values) {
             if (!positionalParams.isEmpty()) {
@@ -306,7 +331,7 @@ public class JdbcClient {
          * Queries rows and maps them to a record, POJO, or scalar type.
          *
          * @param clazz target mapping type
-         * @param <T> result type
+         * @param <T>   result type
          * @return a query specification
          */
         public <T> QuerySpec<T> query(Class<T> clazz) {
@@ -324,7 +349,7 @@ public class JdbcClient {
          * }</pre>
          *
          * @param rowMapper mapper for each current result-set row
-         * @param <T> result type
+         * @param <T>       result type
          * @return a query specification
          */
         public <T> QuerySpec<T> query(RowMapper<T> rowMapper) {
@@ -335,10 +360,10 @@ public class JdbcClient {
          * Reads exactly one scalar value from the first column of one row.
          *
          * @param clazz scalar target type
-         * @param <T> scalar type
+         * @param <T>   scalar type
          * @return the scalar value
          * @throws JdbcClientException with {@link
-         *     JdbcClientException.Code#NO_RESULT} if no row exists
+         *                             JdbcClientException.Code#NO_RESULT} if no row exists
          */
         public <T> T singleValue(Class<T> clazz) {
             return optionalValue(clazz).orElseThrow(() -> new JdbcClientException(Code.NO_RESULT, "Expected a single value but got none"));
@@ -348,7 +373,7 @@ public class JdbcClient {
          * Reads at most one scalar value from the first column.
          *
          * @param clazz scalar target type
-         * @param <T> scalar type
+         * @param <T>   scalar type
          * @return the value, or empty when no row exists
          */
         public <T> Optional<T> optionalValue(Class<T> clazz) {
@@ -469,7 +494,9 @@ public class JdbcClient {
                 this.rowMapper = decorateMapper(rowMapper);
             }
 
-            /** Returns every mapped row as a list. */
+            /**
+             * Returns every mapped row as a list.
+             */
             public List<T> list() {
                 ParsedSql parsed = parseSql(rawSql);
                 return executeQuery(parsed,
@@ -487,8 +514,8 @@ public class JdbcClient {
              * Returns exactly one mapped row.
              *
              * @throws JdbcClientException with {@link
-             *     JdbcClientException.Code#NO_RESULT} if zero or multiple rows
-             *     exist
+             *                             JdbcClientException.Code#NO_RESULT} if zero or multiple rows
+             *                             exist
              */
             public T single() {
                 ParsedSql parsed = parseSql(rawSql);
@@ -509,8 +536,8 @@ public class JdbcClient {
              * Returns zero or one mapped row.
              *
              * @throws JdbcClientException with {@link
-             *     JdbcClientException.Code#TOO_MANY_RESULTS} if multiple rows
-             *     exist
+             *                             JdbcClientException.Code#TOO_MANY_RESULTS} if multiple rows
+             *                             exist
              */
             public Optional<T> optional() {
                 ParsedSql parsed = parseSql(rawSql);
@@ -669,7 +696,7 @@ public class JdbcClient {
      * cause.
      *
      * @param mapper the original row mapper
-     * @param <T> mapped result type
+     * @param <T>    mapped result type
      * @return a mapper that translates failures from the original mapper
      */
     private static <T> RowMapper<T> decorateMapper(RowMapper<T> mapper) {
@@ -707,8 +734,8 @@ public class JdbcClient {
                 Map<String, Object> rowValues = new HashMap<>();
                 for (int i = 1; i <= columnCount; i++) {
                     rowValues.put(metaData.getColumnLabel(i)
-                                          .toLowerCase()
-                                          .replace("_", ""),
+                                    .toLowerCase()
+                                    .replace("_", ""),
                             rs.getObject(i));
                 }
 
@@ -848,7 +875,8 @@ public class JdbcClient {
         }
     }
 
-    private record ParsedSql(String jdbcSql, List<String> orderedParamNames) {}
+    private record ParsedSql(String jdbcSql, List<String> orderedParamNames) {
+    }
 
     @FunctionalInterface
     private interface SQLExecutor<R> {

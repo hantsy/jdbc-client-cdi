@@ -10,7 +10,8 @@ import java.lang.reflect.Type;
  */
 public final class Converters {
 
-    private Converters() {}
+    private Converters() {
+    }
 
     /**
      * Walks the class hierarchy to find the {@code Converter<S, T>} generic

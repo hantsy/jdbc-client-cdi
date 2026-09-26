@@ -1,6 +1,8 @@
 package io.github.hantsy.jdbc;
 
-/** Plain configuration for {@link JdbcClient}. */
+/**
+ * Plain configuration for {@link JdbcClient}.
+ */
 public class JdbcConfig {
 
     public static final JdbcConfig DEFAULT = new JdbcConfig("?", 0, 0);
@@ -9,8 +11,11 @@ public class JdbcConfig {
     private int queryTimeout;
     private int fetchSize;
 
-    /** No-arg constructor required for CDI client proxies. */
-    public JdbcConfig() {}
+    /**
+     * No-arg constructor required for CDI client proxies.
+     */
+    public JdbcConfig() {
+    }
 
     public JdbcConfig(String placeholder, int queryTimeout, int fetchSize) {
         this.placeholder = placeholder;
@@ -36,12 +41,16 @@ public class JdbcConfig {
         return placeholder;
     }
 
-    /** The default query timeout in seconds ({@code 0} = no timeout). */
+    /**
+     * The default query timeout in seconds ({@code 0} = no timeout).
+     */
     public int queryTimeout() {
         return queryTimeout;
     }
 
-    /** The default fetch size hint ({@code 0} = driver default). */
+    /**
+     * The default fetch size hint ({@code 0} = driver default).
+     */
     public int fetchSize() {
         return fetchSize;
     }

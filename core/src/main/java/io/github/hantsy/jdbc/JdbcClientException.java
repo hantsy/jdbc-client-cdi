@@ -19,13 +19,19 @@ public class JdbcClientException extends RuntimeException {
      * diagnostics.
      */
     public enum Code {
-        /** A failure that does not fit another specific code. */
+        /**
+         * A failure that does not fit another specific code.
+         */
         UNCATEGORIZED,
 
-        /** A JDBC connection, statement, SQL, or result-set operation failed. */
+        /**
+         * A JDBC connection, statement, SQL, or result-set operation failed.
+         */
         JDBC,
 
-        /** A custom row mapper or reflective row-to-object mapping failed. */
+        /**
+         * A custom row mapper or reflective row-to-object mapping failed.
+         */
         MAPPING_FAILURE,
 
         /**
@@ -51,7 +57,7 @@ public class JdbcClientException extends RuntimeException {
     /**
      * Creates an exception without an underlying cause.
      *
-     * @param code failure code
+     * @param code    failure code
      * @param message diagnostic message
      */
     public JdbcClientException(Code code, String message) {
@@ -62,9 +68,9 @@ public class JdbcClientException extends RuntimeException {
     /**
      * Creates an exception preserving the underlying cause.
      *
-     * @param code failure code
+     * @param code    failure code
      * @param message diagnostic message
-     * @param cause underlying failure
+     * @param cause   underlying failure
      */
     public JdbcClientException(Code code, String message, Throwable cause) {
         super(message, cause);

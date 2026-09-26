@@ -4,7 +4,9 @@ import javax.sql.DataSource;
 
 import io.github.hantsy.jdbc.JdbcClient;
 import io.github.hantsy.jdbc.converter.ConverterRegistry;
+
 import jakarta.inject.Inject;
+
 import org.jboss.weld.junit5.auto.AddBeanClasses;
 import org.jboss.weld.junit5.auto.EnableAutoWeld;
 import org.junit.jupiter.api.Test;
@@ -35,6 +37,6 @@ class JdbcClientProducerTest {
     @Test
     void connectionIsUsable() {
         assertEquals(1, client.sql("SELECT 1")
-                              .singleValue(Integer.class));
+                .singleValue(Integer.class));
     }
 }

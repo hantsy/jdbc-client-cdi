@@ -5,6 +5,7 @@ import javax.sql.DataSource;
 import io.github.hantsy.jdbc.JdbcClient;
 import io.github.hantsy.jdbc.JdbcConfig;
 import io.github.hantsy.jdbc.converter.ConverterRegistry;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Instance;
 import jakarta.enterprise.inject.Produces;

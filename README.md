@@ -10,7 +10,8 @@ The project is organized into three modules:
 - `jdbc-client-config`: optional MicroProfile Config integration.
 - `jdbc-client-cdi`: CDI producers for `JdbcClient` and converters.
 
-Start with the [reference documentation](https://hantsy.github.io/jdbc-client-cdi/) for installation, usage patterns, and configuration details.
+Start with the [reference documentation](https://hantsy.github.io/jdbc-client-cdi/) for installation, usage patterns,
+and configuration details.
 
 ## Building
 
