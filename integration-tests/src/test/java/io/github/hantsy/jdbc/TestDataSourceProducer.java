@@ -1,11 +1,10 @@
 package io.github.hantsy.jdbc;
 
+import javax.sql.DataSource;
 import jakarta.annotation.Resource;
 import jakarta.annotation.sql.DataSourceDefinition;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Produces;
-
-import javax.sql.DataSource;
 
 /**
  * Declares a self-contained PostgreSQL {@link DataSource} under the portable {@code java:comp/MyDS}

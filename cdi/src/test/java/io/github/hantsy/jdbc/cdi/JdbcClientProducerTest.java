@@ -2,12 +2,12 @@ package io.github.hantsy.jdbc.cdi;
 
 import io.github.hantsy.jdbc.JdbcClient;
 import io.github.hantsy.jdbc.converter.ConverterRegistry;
-import jakarta.inject.Inject;
 import org.jboss.weld.junit5.auto.AddBeanClasses;
 import org.jboss.weld.junit5.auto.EnableAutoWeld;
 import org.junit.jupiter.api.Test;
 
 import javax.sql.DataSource;
+import jakarta.inject.Inject;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;

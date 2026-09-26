@@ -8,12 +8,12 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.Statement;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import javax.sql.DataSource;
 
 /**
  * Fast, container-free smoke test that constructs {@link JdbcClient} directly against H2.
@@ -34,6 +34,13 @@ public class JdbcClientSmokeTest {
         jdbcClient = new JdbcClient(dataSource);
     }
 
+    @AfterAll
+    public static void shutdown() throws Exception {
+        try (Connection conn = dataSource.getConnection(); Statement stmt = conn.createStatement()) {
+            stmt.execute("SHUTDOWN");
+        }
+    }
+
     @BeforeEach
     public void setupDatabase() throws Exception {
         try (Connection conn = dataSource.getConnection();
@@ -44,13 +51,6 @@ public class JdbcClientSmokeTest {
             stmt.execute("INSERT INTO engineers VALUES (2, 'Arquillian Glassfish')");
             stmt.execute("DROP TABLE IF EXISTS engineers_gen");
             stmt.execute("CREATE TABLE engineers_gen (id BIGINT AUTO_INCREMENT PRIMARY KEY, dev_name VARCHAR(255))");
-        }
-    }
-
-    @AfterAll
-    public static void shutdown() throws Exception {
-        try (Connection conn = dataSource.getConnection(); Statement stmt = conn.createStatement()) {
-            stmt.execute("SHUTDOWN");
         }
     }
 

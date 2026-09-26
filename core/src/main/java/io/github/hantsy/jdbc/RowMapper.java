@@ -56,7 +56,7 @@ public interface RowMapper<T> {
     /**
      * Maps the current result-set row.
      *
-     * @param rs the result set positioned at the row to map
+     * @param rs     the result set positioned at the row to map
      * @param rowNum the zero-based index of the row in the query result
      * @return the mapped object; normally non-null
      * @throws SQLException if a JDBC value cannot be read
