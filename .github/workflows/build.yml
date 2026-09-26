@@ -33,6 +33,38 @@ jobs:
       - name: Build and unit test
         run: mvn -B -ntp install
 
+  format-check:
+    name: Format check (jfmt)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Set up JDK 25
+        uses: actions/setup-java@v6
+        with:
+          java-version: '25'
+          distribution: zulu
+
+      - name: Set up ja
+        uses: Netflix/ja/.github/actions/setup-ja@v0.22.1
+
+      - name: Resolve dependencies
+        run: ./mvnw -B -ntp install -DskipTests
+
+      - name: Check formatting
+        run: |
+          set -e
+          for module in core config cdi integration-tests; do
+            ./mvnw -B -ntp -pl "$module" dependency:build-classpath \
+              -Dmdep.outputFile=target/jfmt-cp.txt \
+              -Dmdep.includeScope=test -q
+            cp_file="$module/target/jfmt-cp.txt"
+            echo "Checking $module"
+            find "$module/src" -name '*.java' -print0 | \
+              xargs -0 jfmt --check -cp "$(cat "$cp_file")"
+          done
+
   integration-tests-glassfish:
     name: Integration tests (GlassFish)
     runs-on: ubuntu-latest
