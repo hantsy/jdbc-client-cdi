@@ -1,6 +1,7 @@
 # Querying and result mapping
 
-`JdbcClient.sql(...)` returns a SQL specification. It supports named parameters such as `:name`, positional parameters such as `?`, statement hints, typed mapping, and update statements.
+`JdbcClient.sql(...)` returns a SQL specification. It supports named parameters such as `:name`, positional parameters
+such as `?`, statement hints, typed mapping, and update statements.
 
 ## Retrieving simple values
 
@@ -16,7 +17,8 @@ Optional<Long> maybeCount = client.sql("SELECT COUNT(*) FROM engineers")
 
 ## Mapping results to records and POJOs
 
-The built-in typed mapper matches result-column labels to record components or fields. Underscores are ignored when matching a column name to a record component.
+The built-in typed mapper matches result-column labels to record components or fields. Underscores are ignored when
+matching a column name to a record component.
 
 ```java
 public record DevSummary(Long id, String devName) {
@@ -35,7 +37,8 @@ The following result-access patterns are available:
 - `single()` requires exactly one row.
 - `optional()` allows zero or one row.
 - `list()` reads all rows before returning.
-- `stream()` returns a lazy stream, and the stream should be closed when work is complete so JDBC resources are released.
+- `stream()` returns a lazy stream, and the stream should be closed when work is complete so JDBC resources are
+  released.
 
 ```java
 DevSummary one = client.sql("SELECT ... WHERE id = :id")
@@ -74,7 +77,8 @@ List<DevSummary> devs = client
 
 ## Configuring converters
 
-Converters translate a database value into the Java type requested by a typed mapper or scalar query. The built-in mapper supports common conversions for numeric types, strings, booleans, SQL date/time types, and Java time types.
+Converters translate a database value into the Java type requested by a typed mapper or scalar query. The built-in
+mapper supports common conversions for numeric types, strings, booleans, SQL date/time types, and Java time types.
 
 Use a `ConverterRegistry` with a standalone client:
 
@@ -95,7 +99,8 @@ Converter<UUID, String> converter = UUID::toString;
 registry.register(UUID.class, String.class, converter);
 ```
 
-In a CDI application, register the converter as an application-scoped bean. The CDI integration automatically discovers the generic source and target types.
+In a CDI application, register the converter as an application-scoped bean. The CDI integration automatically discovers
+the generic source and target types.
 
 ```java
 @ApplicationScoped
@@ -110,4 +115,5 @@ public class UuidToStringConverter implements Converter<UUID, String> {
 
 Converters are consulted when the JDBC value is not already assignable to the requested target type.
 
-For executing inserts, updates, and batch statements, see [updates](updates.md). For configuration options, see [configuration](configuration.md).
+For executing inserts, updates, and batch statements, see [updates](updates.md). For configuration options,
+see [configuration](configuration.md).

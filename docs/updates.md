@@ -1,10 +1,12 @@
 # Updates, generated keys, and batches
 
-`JdbcClient` supports write operations, generated keys, and efficient batch updates without leaving the fluent API. The examples below cover the common patterns used when modifying data in an application.
+`JdbcClient` supports write operations, generated keys, and efficient batch updates without leaving the fluent API. The
+examples below cover the common patterns used when modifying data in an application.
 
 ## Updating data
 
-Use `update()` for SQL statements such as `INSERT`, `UPDATE`, and `DELETE`. The method returns the number of rows affected.
+Use `update()` for SQL statements such as `INSERT`, `UPDATE`, and `DELETE`. The method returns the number of rows
+affected.
 
 ```java
 int rows = client
@@ -31,7 +33,8 @@ Map<String, Object> firstRow = keys.getKeys();
 List<Map<String, Object>> allRows = keys.getKeyList();
 ```
 
-The JDBC driver must support generated keys. `getKey()` returns the first column from the first generated-key row, while `getKeys()` and `getKeyList()` preserve column labels and multiple rows.
+The JDBC driver must support generated keys. `getKey()` returns the first column from the first generated-key row, while
+`getKeys()` and `getKeyList()` preserve column labels and multiple rows.
 
 ## Executing batch updates
 
@@ -57,6 +60,7 @@ int[] results = client
         });
 ```
 
-These patterns keep write operations compact and consistent while exposing the database-specific capabilities needed for generated keys and bulk updates.
+These patterns keep write operations compact and consistent while exposing the database-specific capabilities needed for
+generated keys and bulk updates.
 
 For query execution, parameter binding, and result mapping, see [querying and result mapping](querying.md).

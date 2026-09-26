@@ -1,14 +1,17 @@
 name: Publish package to the Maven Central Repository
 
 on:
-#  release:
-#    types: [created]
   workflow_dispatch:
     inputs:
       version:
         description: 'Version to release (e.g., 1.2.3)'
         required: true
         type: string
+      next_version:
+        description: 'New version for next development iteration (e.g., 1.2.4-SNAPSHOT)'
+        required: true
+        type: string
+        default: '1.0.0-SNAPSHOT'
 
 jobs:
   publish:
@@ -49,3 +52,10 @@ jobs:
           MAVEN_USERNAME: ${{ secrets.CENTRAL_USERNAME }}
           MAVEN_PASSWORD: ${{ secrets.CENTRAL_TOKEN }}
           MAVEN_GPG_PASSPHRASE: ${{ secrets.GPG_SIGNING_KEY_PASSWORD }}
+
+      - name: Set New Maven Version For Next Dev Iteration
+        run: |
+          mvn versions:set -DnewVersion=${{ inputs.next_version }} -DgenerateBackupPoms=false
+          git add pom.xml
+          git commit -m "chore: prepare next development iteration: ${{ inputs.next_version }}"
+          git push origin master

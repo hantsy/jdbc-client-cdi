@@ -12,7 +12,9 @@ public final class Converters {
     private Converters() {
     }
 
-    /** Walks the class hierarchy to find the {@code Converter<S, T>} generic interface and return its type arguments. */
+    /**
+     * Walks the class hierarchy to find the {@code Converter<S, T>} generic interface and return its type arguments.
+     */
     public static Type[] typeArguments(Class<?> clazz) {
         Class<?> current = clazz;
         while (current != null && current != Object.class) {

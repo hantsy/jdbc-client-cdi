@@ -14,9 +14,6 @@ public class ConverterRegistry {
 
     private final Map<ConversionKey, Converter<?, ?>> matrix = new HashMap<>();
 
-    public record ConversionKey(Class<?> sourceType, Class<?> targetType) {
-    }
-
     public <S, T> ConverterRegistry register(Class<S> sourceType, Class<T> targetType, Converter<S, T> converter) {
         Objects.requireNonNull(sourceType, "sourceType must not be null");
         Objects.requireNonNull(targetType, "targetType must not be null");
@@ -25,7 +22,9 @@ public class ConverterRegistry {
         return this;
     }
 
-    /** Registers a converter, resolving its source/target types from its {@code Converter<S, T>} generic interface. */
+    /**
+     * Registers a converter, resolving its source/target types from its {@code Converter<S, T>} generic interface.
+     */
     public ConverterRegistry register(Converter<?, ?> converter) {
         Objects.requireNonNull(converter, "converter must not be null");
         Type[] args = Converters.typeArguments(converter.getClass());
@@ -42,5 +41,8 @@ public class ConverterRegistry {
     @SuppressWarnings("unchecked")
     public <S, T> Converter<S, T> getConverter(Class<S> source, Class<T> target) {
         return (Converter<S, T>) matrix.get(new ConversionKey(source, target));
+    }
+
+    public record ConversionKey(Class<?> sourceType, Class<?> targetType) {
     }
 }
