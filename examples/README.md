@@ -6,12 +6,12 @@ workflow (one job per example).
 
 ## Overview
 
-| Example | Packaging | Demonstrates |
-|---|---|---|
-| [`vanilla`](vanilla) | jar | The core `JdbcClient` with no CDI, backed by an in-memory H2 `DataSource`. |
-| [`javase`](javase) | jar | The core + CDI modules, bootstrapped with Weld SE from a `main()` method. |
-| [`servlet`](servlet) | war | The core module in a Servlet container (Tomcat 11), with the `DataSource` provided via JNDI from `META-INF/context.xml`. |
-| [`jakartaee`](jakartaee) | war | The core + CDI modules behind a JAX-RS resource on GlassFish / WildFly, backed by PostgreSQL. |
+| Example                  | Packaging | Demonstrates                                                                                                             |
+|--------------------------|-----------|--------------------------------------------------------------------------------------------------------------------------|
+| [`vanilla`](vanilla)     | jar       | The core `JdbcClient` with no CDI, backed by an in-memory H2 `DataSource`.                                               |
+| [`javase`](javase)       | jar       | The core + CDI modules, bootstrapped with Weld SE from a `main()` method.                                                |
+| [`servlet`](servlet)     | war       | The core module in a Servlet container (Tomcat 11), with the `DataSource` provided via JNDI from `META-INF/context.xml`. |
+| [`jakartaee`](jakartaee) | war       | The core + CDI modules behind a JAX-RS resource on GlassFish / WildFly, backed by PostgreSQL.                            |
 
 Each example keeps the same small CRUD story: get all, get by id, insert,
 update, and delete an `Engineer`.

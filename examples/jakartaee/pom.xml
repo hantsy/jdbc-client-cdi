@@ -15,7 +15,8 @@
     <packaging>war</packaging>
 
     <name>jdbc-client-example-jakartaee</name>
-    <description>Jakarta EE example: CDI-injected JdbcClient behind a JAX-RS resource on GlassFish / WildFly.</description>
+    <description>Jakarta EE example: CDI-injected JdbcClient behind a JAX-RS resource on GlassFish / WildFly.
+    </description>
 
     <properties>
         <skip.integration.tests>true</skip.integration.tests>
@@ -109,7 +110,8 @@
         <profile>
             <id>glassfish</id>
             <properties>
-                <cargo.zipUrlInstaller.downloadDir>${project.build.directory}/cargo-downloads</cargo.zipUrlInstaller.downloadDir>
+                <cargo.zipUrlInstaller.downloadDir>${project.build.directory}/cargo-downloads
+                </cargo.zipUrlInstaller.downloadDir>
             </properties>
             <build>
                 <plugins>
@@ -120,7 +122,9 @@
                             <container>
                                 <containerId>glassfish8x</containerId>
                                 <zipUrlInstaller>
-                                    <url>https://github.com/eclipse-ee4j/glassfish/releases/download/${glassfish.version}/glassfish-${glassfish.version}.zip</url>
+                                    <url>
+                                        https://github.com/eclipse-ee4j/glassfish/releases/download/${glassfish.version}/glassfish-${glassfish.version}.zip
+                                    </url>
                                     <downloadDir>${cargo.zipUrlInstaller.downloadDir}</downloadDir>
                                 </zipUrlInstaller>
                             </container>

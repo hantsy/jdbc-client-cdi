@@ -54,7 +54,7 @@ For positional SQL, pass an array for each batch entry:
 ```java
 int[] results = client
         .sql("UPDATE engineers SET active = ? WHERE id = ?")
-        .batchUpdate(new Object[][] {
+        .batchUpdate(new Object[][]{
                 {true, 1L},
                 {false, 2L}
         });

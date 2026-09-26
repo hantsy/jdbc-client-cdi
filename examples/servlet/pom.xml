@@ -15,7 +15,9 @@
     <packaging>war</packaging>
 
     <name>jdbc-client-example-servlet</name>
-    <description>Servlet container example: a plain HttpServlet backed by the core JdbcClient and a JNDI DataSource on Tomcat 11.</description>
+    <description>Servlet container example: a plain HttpServlet backed by the core JdbcClient and a JNDI DataSource on
+        Tomcat 11.
+    </description>
 
     <properties>
         <skip.integration.tests>true</skip.integration.tests>

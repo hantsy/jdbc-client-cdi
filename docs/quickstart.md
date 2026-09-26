@@ -10,6 +10,7 @@ After `jdbc-client-core` has been added to the project dependencies, a `JdbcClie
 
 ```java
 import io.github.hantsy.jdbc.JdbcClient;
+
 import javax.sql.DataSource;
 
 DataSource dataSource = ...; // obtain a DataSource from the application or runtime
@@ -34,6 +35,7 @@ In a Jakarta EE/CDI environment, CDI can create and inject the client. Add `jdbc
 then expose a `DataSource` as a bean:
 
 ```java
+
 @ApplicationScoped
 public class TestDataSourceProducer {
 
@@ -51,7 +53,9 @@ public class TestDataSourceProducer {
 The `JdbcClient` is then available for injection:
 
 ```java
-@Inject JdbcClient client;
+
+@Inject
+JdbcClient client;
 ```
 
 ## Executing queries
