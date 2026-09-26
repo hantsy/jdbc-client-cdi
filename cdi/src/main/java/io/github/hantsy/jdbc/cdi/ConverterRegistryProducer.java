@@ -8,8 +8,9 @@ import jakarta.enterprise.inject.Instance;
 import jakarta.enterprise.inject.Produces;
 
 /**
- * Produces the {@code @ApplicationScoped} {@link ConverterRegistry}, populated with every CDI
- * {@link Converter} bean (source/target types detected from their generic {@code <S, T>} interface).
+ * Produces the {@code @ApplicationScoped} {@link ConverterRegistry}, populated
+ * with every CDI {@link Converter} bean (source/target types detected from
+ * their generic {@code <S, T>} interface).
  */
 @ApplicationScoped
 public class ConverterRegistryProducer {

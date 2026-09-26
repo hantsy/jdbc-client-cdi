@@ -7,9 +7,9 @@ import jakarta.inject.Inject;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 /**
- * Produces the {@code @ApplicationScoped} {@link JdbcConfig} bean from the {@code jdbcclient.*}
- * MicroProfile Config properties. This is the optional integration point consumed by the {@code cdi}
- * module.
+ * Produces the {@code @ApplicationScoped} {@link JdbcConfig} bean from the
+ * {@code jdbcclient.*} MicroProfile Config properties. This is the optional
+ * integration point consumed by the {@code cdi} module.
  */
 @ApplicationScoped
 public class JdbcConfigProducer {

@@ -1,5 +1,14 @@
 package io.github.hantsy.jdbc;
 
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import javax.sql.DataSource;
+
+import io.github.hantsy.jdbc.JdbcClientException.Code;
 import io.github.hantsy.jdbc.support.GeneratedKeyHolder;
 import org.h2.jdbcx.JdbcDataSource;
 import org.junit.jupiter.api.AfterAll;
@@ -8,15 +17,9 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.Statement;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-
 /**
- * Fast, container-free smoke test that constructs {@link JdbcClient} directly against H2.
+ * Fast, container-free smoke test that constructs {@link JdbcClient} directly
+ * against H2.
  */
 public class JdbcClientSmokeTest {
 
@@ -49,7 +52,8 @@ public class JdbcClientSmokeTest {
 
     @AfterAll
     public static void shutdown() throws Exception {
-        try (Connection conn = dataSource.getConnection(); Statement stmt = conn.createStatement()) {
+        try (Connection conn = dataSource.getConnection();
+             Statement stmt = conn.createStatement()) {
             stmt.execute("SHUTDOWN");
         }
     }
@@ -57,39 +61,50 @@ public class JdbcClientSmokeTest {
     @Test
     public void list() {
         List<DevSummary> all = jdbcClient.sql("SELECT id, dev_name FROM engineers ORDER BY id")
-                .query(DevSummary.class).list();
+                .query(DevSummary.class)
+                .list();
         Assertions.assertEquals(2, all.size());
     }
 
     @Test
     public void single() {
         DevSummary one = jdbcClient.sql("SELECT id, dev_name FROM engineers WHERE id = :id")
-                .param("id", 1L).query(DevSummary.class).single();
+                .param("id", 1L)
+                .query(DevSummary.class)
+                .single();
         Assertions.assertEquals("Duke Jakarta", one.devName());
     }
 
     @Test
     public void singleThrowsWhenEmpty() {
-        JdbcClientException exception = Assertions.assertThrows(JdbcClientException.class, () ->
-                jdbcClient.sql("SELECT id, dev_name FROM engineers WHERE id = :id")
-                        .param("id", 999L).query(DevSummary.class).single());
-        Assertions.assertEquals(JdbcClientException.Code.NO_RESULT, exception.getCode());
+        JdbcClientException exception = Assertions.assertThrows(JdbcClientException.class,
+                () -> jdbcClient.sql("SELECT id, dev_name FROM engineers WHERE id = :id")
+                                .param("id", 999L)
+                                .query(DevSummary.class)
+                                .single());
+        Assertions.assertEquals(Code.NO_RESULT, exception.getCode());
     }
 
     @Test
     public void singleThrowsWhenMany() {
-        Assertions.assertThrows(JdbcClientException.class, () ->
-                jdbcClient.sql("SELECT id, dev_name FROM engineers").query(DevSummary.class).single());
+        Assertions.assertThrows(JdbcClientException.class,
+                () -> jdbcClient.sql("SELECT id, dev_name FROM engineers")
+                                .query(DevSummary.class)
+                                .single());
     }
 
     @Test
     public void optionalFoundAndEmpty() {
         Optional<DevSummary> found = jdbcClient.sql("SELECT id, dev_name FROM engineers WHERE id = :id")
-                .param("id", 1L).query(DevSummary.class).optional();
+                .param("id", 1L)
+                .query(DevSummary.class)
+                .optional();
         Assertions.assertTrue(found.isPresent());
 
         Optional<DevSummary> missing = jdbcClient.sql("SELECT id, dev_name FROM engineers WHERE id = :id")
-                .param("id", 999L).query(DevSummary.class).optional();
+                .param("id", 999L)
+                .query(DevSummary.class)
+                .optional();
         Assertions.assertTrue(missing.isEmpty());
     }
 
@@ -101,8 +116,8 @@ public class JdbcClientSmokeTest {
 
     @Test
     public void singleValueThrowsWhenEmpty() {
-        Assertions.assertThrows(JdbcClientException.class, () ->
-                jdbcClient.sql("SELECT id FROM engineers WHERE id = 999").singleValue(Long.class));
+        Assertions.assertThrows(JdbcClientException.class,
+                () -> jdbcClient.sql("SELECT id FROM engineers WHERE id = 999").singleValue(Long.class));
     }
 
     @Test
@@ -110,60 +125,66 @@ public class JdbcClientSmokeTest {
         Optional<Long> count = jdbcClient.sql("SELECT COUNT(*) FROM engineers").optionalValue(Long.class);
         Assertions.assertEquals(Optional.of(2L), count);
 
-        Optional<Long> empty = jdbcClient.sql("SELECT id FROM engineers WHERE id = 999")
-                .optionalValue(Long.class);
+        Optional<Long> empty = jdbcClient.sql("SELECT id FROM engineers WHERE id = 999").optionalValue(Long.class);
         Assertions.assertTrue(empty.isEmpty());
     }
 
     @Test
     public void customRowMapper() {
         List<String> names = jdbcClient.sql("SELECT dev_name FROM engineers ORDER BY id")
-                .query((rs, rowNum) -> rs.getString("dev_name")).list();
+                .query((rs, rowNum) -> rs.getString("dev_name"))
+                .list();
         Assertions.assertEquals(List.of("Duke Jakarta", "Arquillian Glassfish"), names);
     }
 
     @Test
     public void explicitRowMapper() {
-        RowMapper<DevSummary> rowMapper =
-                (rs, rowNum) -> new DevSummary(rs.getLong("id"), rs.getString("dev_name"));
+        RowMapper<DevSummary> rowMapper = (rs, rowNum) -> new DevSummary(rs.getLong("id"), rs.getString("dev_name"));
 
         List<DevSummary> summaries = jdbcClient.sql("SELECT id, dev_name FROM engineers ORDER BY id")
-                .query(rowMapper).list();
+                .query(rowMapper)
+                .list();
 
-        Assertions.assertEquals(List.of(
-                new DevSummary(1L, "Duke Jakarta"),
-                new DevSummary(2L, "Arquillian Glassfish")), summaries);
+        Assertions.assertEquals(List.of(new DevSummary(1L, "Duke Jakarta"), new DevSummary(2L, "Arquillian Glassfish")),
+                summaries);
     }
 
     @Test
     public void mapperFailureIsCategorized() {
-        JdbcClientException exception = Assertions.assertThrows(JdbcClientException.class, () ->
-                jdbcClient.sql("SELECT id FROM engineers")
-                        .query((rs, rowNum) -> {
-                            throw new java.sql.SQLException("mapping failed");
-                        })
-                        .list());
+        JdbcClientException exception = Assertions.assertThrows(JdbcClientException.class,
+                () -> jdbcClient.sql("SELECT id FROM engineers")
+                                .query((rs, rowNum) -> {
+                                    throw new SQLException("mapping failed");
+                                })
+                                .list());
 
-        Assertions.assertEquals(JdbcClientException.Code.MAPPING_FAILURE, exception.getCode());
-        Assertions.assertInstanceOf(java.sql.SQLException.class, exception.getCause());
+        Assertions.assertEquals(Code.MAPPING_FAILURE, exception.getCode());
+        Assertions.assertInstanceOf(SQLException.class, exception.getCause());
     }
 
     @Test
     public void listMapsToPojo() {
         List<DevSummaryPojo> all = jdbcClient.sql("SELECT id, dev_name FROM engineers ORDER BY id")
-                .query(DevSummaryPojo.class).list();
+                .query(DevSummaryPojo.class)
+                .list();
 
         Assertions.assertEquals(2, all.size());
-        Assertions.assertEquals(1L, all.get(0).getId());
-        Assertions.assertEquals("Duke Jakarta", all.get(0).getDevName());
-        Assertions.assertEquals(2L, all.get(1).getId());
-        Assertions.assertEquals("Arquillian Glassfish", all.get(1).getDevName());
+        Assertions.assertEquals(1L, all.get(0)
+                .getId());
+        Assertions.assertEquals("Duke Jakarta", all.get(0)
+                .getDevName());
+        Assertions.assertEquals(2L, all.get(1)
+                .getId());
+        Assertions.assertEquals("Arquillian Glassfish", all.get(1)
+                .getDevName());
     }
 
     @Test
     public void singleMapsToPojo() {
         DevSummaryPojo summary = jdbcClient.sql("SELECT id, dev_name FROM engineers WHERE id = :id")
-                .param("id", 2L).query(DevSummaryPojo.class).single();
+                .param("id", 2L)
+                .query(DevSummaryPojo.class)
+                .single();
 
         Assertions.assertEquals(2L, summary.getId());
         Assertions.assertEquals("Arquillian Glassfish", summary.getDevName());
@@ -171,30 +192,37 @@ public class JdbcClientSmokeTest {
 
     @Test
     public void stream() {
-        List<DevSummary> all = jdbcClient.sql("SELECT id, dev_name FROM engineers ORDER BY id")
-                .query(DevSummary.class).stream().toList();
+        List<DevSummary> all = jdbcClient.sql("SELECT id, dev_name FROM engineers ORDER BY id").query(DevSummary.class).stream()
+                .toList();
         Assertions.assertEquals(2, all.size());
     }
 
     @Test
     public void paramsMap() {
         List<DevSummary> r = jdbcClient.sql("SELECT id, dev_name FROM engineers WHERE id = :id")
-                .params(Map.of("id", 2L)).query(DevSummary.class).list();
-        Assertions.assertEquals("Arquillian Glassfish", r.get(0).devName());
+                .params(Map.of("id", 2L))
+                .query(DevSummary.class)
+                .list();
+        Assertions.assertEquals("Arquillian Glassfish", r.get(0)
+                .devName());
     }
 
     @Test
     public void paramsVarargs() {
         List<DevSummary> r = jdbcClient.sql("SELECT id, dev_name FROM engineers WHERE id = ?")
-                .params(1L).query(DevSummary.class).list();
-        Assertions.assertEquals("Duke Jakarta", r.get(0).devName());
+                .params(1L)
+                .query(DevSummary.class)
+                .list();
+        Assertions.assertEquals("Duke Jakarta", r.get(0)
+                .devName());
     }
 
     @Test
     public void generatedKeys() {
         GeneratedKeyHolder keys = new GeneratedKeyHolder();
         int rows = jdbcClient.sql("INSERT INTO engineers_gen (dev_name) VALUES (:name)")
-                .param("name", "New Dev").update(keys);
+                             .param("name", "New Dev")
+                             .update(keys);
         Assertions.assertEquals(1, rows);
         Assertions.assertNotNull(keys.getKey());
         Assertions.assertTrue(((Number) keys.getKey()).longValue() > 0);
@@ -217,14 +245,17 @@ public class JdbcClientSmokeTest {
     @Test
     public void queryTimeout() {
         List<DevSummary> all = jdbcClient.sql("SELECT id, dev_name FROM engineers ORDER BY id")
-                .queryTimeout(10).query(DevSummary.class).list();
+                .queryTimeout(10)
+                .query(DevSummary.class)
+                .list();
         Assertions.assertEquals(2, all.size());
     }
 
     @Test
     public void mixingThrows() {
-        Assertions.assertThrows(IllegalArgumentException.class, () ->
-                jdbcClient.sql("SELECT id, dev_name FROM engineers WHERE id = :id")
-                        .param("id", 1L).param(1L));
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> jdbcClient.sql("SELECT id, dev_name FROM engineers WHERE id = :id")
+                                .param("id", 1L)
+                                .param(1L));
     }
 }

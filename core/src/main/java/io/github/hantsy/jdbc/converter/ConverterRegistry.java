@@ -6,18 +6,18 @@ import java.util.Map;
 import java.util.Objects;
 
 /**
- * A plain (non-CDI) registry of {@link Converter} implementations. Register converters manually, or
- * (from the CDI layer) register discovered converter beans and let their generic type arguments be
- * detected automatically.
+ * A plain (non-CDI) registry of {@link Converter} implementations. Register
+ * converters manually, or (from the CDI layer) register discovered converter
+ * beans and let their generic type arguments be detected automatically.
  */
 public class ConverterRegistry {
 
     private final Map<ConversionKey, Converter<?, ?>> matrix = new HashMap<>();
 
-    public record ConversionKey(Class<?> sourceType, Class<?> targetType) {
-    }
+    public record ConversionKey(Class<?> sourceType, Class<?> targetType) {}
 
-    public <S, T> ConverterRegistry register(Class<S> sourceType, Class<T> targetType, Converter<S, T> converter) {
+    public <S, T> ConverterRegistry register(Class<S> sourceType, Class<T> targetType,
+            Converter<S, T> converter) {
         Objects.requireNonNull(sourceType, "sourceType must not be null");
         Objects.requireNonNull(targetType, "targetType must not be null");
         Objects.requireNonNull(converter, "converter must not be null");
@@ -25,7 +25,10 @@ public class ConverterRegistry {
         return this;
     }
 
-    /** Registers a converter, resolving its source/target types from its {@code Converter<S, T>} generic interface. */
+    /**
+     * Registers a converter, resolving its source/target types from its {@code
+     * Converter<S, T>} generic interface.
+     */
     public ConverterRegistry register(Converter<?, ?> converter) {
         Objects.requireNonNull(converter, "converter must not be null");
         Type[] args = Converters.typeArguments(converter.getClass());

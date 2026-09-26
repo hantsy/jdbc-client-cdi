@@ -1,5 +1,15 @@
 package io.github.hantsy.jdbc;
 
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.Statement;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.sql.DataSource;
+
 import io.github.hantsy.jdbc.support.GeneratedKeyHolder;
 import io.github.hantsy.jdbc.support.KeyHolder;
 import jakarta.inject.Inject;
@@ -13,23 +23,14 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.Statement;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 @ArquillianTest
 public class JdbcClientIT {
     private static final Logger LOGGER = Logger.getLogger(JdbcClientIT.class.getName());
 
     @Deployment
     public static WebArchive createDeployment() {
-        var libs = Maven.resolver().loadPomFromFile("pom.xml")
+        var libs = Maven.resolver()
+                .loadPomFromFile("pom.xml")
                 .resolve("org.postgresql:postgresql")
                 .withTransitivity()
                 .asFile();
@@ -69,14 +70,16 @@ public class JdbcClientIT {
                 .query(DevSummary.class)
                 .list();
         Assertions.assertEquals(1, namedResult.size());
-        Assertions.assertEquals("Duke Jakarta", namedResult.get(0).devName());
+        Assertions.assertEquals("Duke Jakarta", namedResult.get(0)
+                .devName());
 
         List<DevSummary> positionalResult = jdbcClient.sql("SELECT id, dev_name FROM engineers WHERE id = ?")
                 .param(2L)
                 .query(DevSummary.class)
                 .list();
         Assertions.assertEquals(1, positionalResult.size());
-        Assertions.assertEquals("Arquillian Glassfish", positionalResult.get(0).devName());
+        Assertions.assertEquals("Arquillian Glassfish", positionalResult.get(0)
+                .devName());
     }
 
     @Test
@@ -90,19 +93,19 @@ public class JdbcClientIT {
 
     @Test
     public void singleThrowsWhenEmpty() {
-        Assertions.assertThrows(JdbcClientException.class, () ->
-                jdbcClient.sql("SELECT id, dev_name FROM engineers WHERE id = :id")
-                        .param("id", 999L)
-                        .query(DevSummary.class)
-                        .single());
+        Assertions.assertThrows(JdbcClientException.class,
+                () -> jdbcClient.sql("SELECT id, dev_name FROM engineers WHERE id = :id")
+                                .param("id", 999L)
+                                .query(DevSummary.class)
+                                .single());
     }
 
     @Test
     public void singleThrowsWhenMultipleRows() {
-        Assertions.assertThrows(JdbcClientException.class, () ->
-                jdbcClient.sql("SELECT id, dev_name FROM engineers")
-                        .query(DevSummary.class)
-                        .single());
+        Assertions.assertThrows(JdbcClientException.class,
+                () -> jdbcClient.sql("SELECT id, dev_name FROM engineers")
+                                .query(DevSummary.class)
+                                .single());
     }
 
     @Test
@@ -112,7 +115,8 @@ public class JdbcClientIT {
                 .query(DevSummary.class)
                 .optional();
         Assertions.assertTrue(result.isPresent());
-        Assertions.assertEquals("Duke Jakarta", result.get().devName());
+        Assertions.assertEquals("Duke Jakarta", result.get()
+                .devName());
     }
 
     @Test
@@ -126,29 +130,27 @@ public class JdbcClientIT {
 
     @Test
     public void optionalThrowsWhenMultipleRows() {
-        Assertions.assertThrows(JdbcClientException.class, () ->
-                jdbcClient.sql("SELECT id, dev_name FROM engineers")
-                        .query(DevSummary.class)
-                        .optional());
+        Assertions.assertThrows(JdbcClientException.class,
+                () -> jdbcClient.sql("SELECT id, dev_name FROM engineers")
+                                .query(DevSummary.class)
+                                .optional());
     }
 
     @Test
     public void singleValueReadsScalar() {
-        Long count = jdbcClient.sql("SELECT COUNT(*) FROM engineers")
-                .singleValue(Long.class);
+        Long count = jdbcClient.sql("SELECT COUNT(*) FROM engineers").singleValue(Long.class);
         Assertions.assertEquals(2L, count);
     }
 
     @Test
     public void singleValueThrowsWhenEmpty() {
-        Assertions.assertThrows(JdbcClientException.class, () ->
-                jdbcClient.sql("SELECT id FROM engineers WHERE id = 999").singleValue(Long.class));
+        Assertions.assertThrows(JdbcClientException.class,
+                () -> jdbcClient.sql("SELECT id FROM engineers WHERE id = 999").singleValue(Long.class));
     }
 
     @Test
     public void optionalValueReadsScalar() {
-        Optional<Long> count = jdbcClient.sql("SELECT COUNT(*) FROM engineers")
-                .optionalValue(Long.class);
+        Optional<Long> count = jdbcClient.sql("SELECT COUNT(*) FROM engineers").optionalValue(Long.class);
         Assertions.assertEquals(Optional.of(2L), count);
     }
 
@@ -162,12 +164,11 @@ public class JdbcClientIT {
 
     @Test
     public void streamYieldsAllRows() {
-        List<DevSummary> all = jdbcClient.sql("SELECT id, dev_name FROM engineers ORDER BY id")
-                .query(DevSummary.class)
-                .stream()
+        List<DevSummary> all = jdbcClient.sql("SELECT id, dev_name FROM engineers ORDER BY id").query(DevSummary.class).stream()
                 .toList();
         Assertions.assertEquals(2, all.size());
-        Assertions.assertEquals("Duke Jakarta", all.get(0).devName());
+        Assertions.assertEquals("Duke Jakarta", all.get(0)
+                .devName());
     }
 
     @Test
@@ -176,7 +177,8 @@ public class JdbcClientIT {
                 .params(Map.of("id", 1L))
                 .query(DevSummary.class)
                 .list();
-        Assertions.assertEquals("Duke Jakarta", result.get(0).devName());
+        Assertions.assertEquals("Duke Jakarta", result.get(0)
+                .devName());
     }
 
     @Test
@@ -185,34 +187,31 @@ public class JdbcClientIT {
                 .params(2L)
                 .query(DevSummary.class)
                 .list();
-        Assertions.assertEquals("Arquillian Glassfish", result.get(0).devName());
+        Assertions.assertEquals("Arquillian Glassfish", result.get(0)
+                .devName());
     }
 
     @Test
     public void updateWithKeyHolderPopulatesHolder() {
         KeyHolder holder = new GeneratedKeyHolder();
         int rows = jdbcClient.sql("INSERT INTO engineers_gen (dev_name) VALUES (:name)")
-                .param("name", "Another Dev")
-                .update(holder);
+                             .param("name", "Another Dev")
+                             .update(holder);
         Assertions.assertEquals(1, rows);
         Assertions.assertNotNull(holder.getKey());
     }
 
     @Test
     public void batchUpdateWithNamedMaps() {
-        List<Map<String, Object>> batch = List.of(
-                Map.of("name", "Dev C"),
-                Map.of("name", "Dev D"));
-        int[] counts = jdbcClient.sql("INSERT INTO engineers_gen (dev_name) VALUES (:name)")
-                .batchUpdate(batch);
+        List<Map<String, Object>> batch = List.of(Map.of("name", "Dev C"), Map.of("name", "Dev D"));
+        int[] counts = jdbcClient.sql("INSERT INTO engineers_gen (dev_name) VALUES (:name)").batchUpdate(batch);
         Assertions.assertEquals(2, counts.length);
     }
 
     @Test
     public void batchUpdateWithPositionalArrays() {
         Object[][] batch = {{"Dev E"}, {"Dev F"}};
-        int[] counts = jdbcClient.sql("INSERT INTO engineers_gen (dev_name) VALUES (?)")
-                .batchUpdate(batch);
+        int[] counts = jdbcClient.sql("INSERT INTO engineers_gen (dev_name) VALUES (?)").batchUpdate(batch);
         Assertions.assertEquals(2, counts.length);
     }
 
@@ -236,10 +235,10 @@ public class JdbcClientIT {
 
     @Test
     public void mixingNamedAndPositionalThrows() {
-        Assertions.assertThrows(IllegalArgumentException.class, () ->
-                jdbcClient.sql("SELECT id, dev_name FROM engineers WHERE id = :id")
-                        .param("id", 1L)
-                        .param(1L));
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> jdbcClient.sql("SELECT id, dev_name FROM engineers WHERE id = :id")
+                                .param("id", 1L)
+                                .param(1L));
     }
 
     @Test
