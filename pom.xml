@@ -39,6 +39,7 @@
         <module>config</module>
         <module>cdi</module>
         <module>examples</module>
+        <module>init</module>
     </modules>
 
     <properties>
