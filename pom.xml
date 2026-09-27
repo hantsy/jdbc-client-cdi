@@ -38,8 +38,8 @@
         <module>core</module>
         <module>config</module>
         <module>cdi</module>
-        <module>integration-tests</module>
         <module>tx</module>
+        <module>examples</module>
     </modules>
 
     <properties>
