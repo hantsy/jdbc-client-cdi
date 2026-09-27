@@ -18,7 +18,7 @@ import jakarta.enterprise.inject.Produces;
         password = "postgres"
 )
 @ApplicationScoped
-public class TestDataSourceProducer {
+public class DataSourceProducer {
 
     @Resource(lookup = "java:comp/MyDS")
     private DataSource dataSource;

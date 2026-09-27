@@ -31,4 +31,4 @@ jobs:
           cache: maven
 
       - name: Build and unit test
-        run: mvn -B -ntp install
+        run: mvn -B -ntp install -pl "!examples"

@@ -4,21 +4,17 @@ import io.github.hantsy.jdbc.JdbcClient;
 import io.github.hantsy.jdbc.support.GeneratedKeyHolder;
 import io.github.hantsy.jdbc.support.KeyHolder;
 
-import jakarta.annotation.Resource;
-import jakarta.servlet.ServletException;
+import jakarta.inject.Inject;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-import javax.sql.DataSource;
 import java.io.IOException;
-import java.sql.SQLException;
 import java.util.List;
 
 /**
- * A minimal CRUD servlet backed by the core {@link JdbcClient}. The {@link DataSource} is provided by
- * the container through JNDI ({@code META-INF/context.xml}) and injected with {@code @Resource}.
+ * A minimal CRUD servlet backed by a CDI-injected {@link JdbcClient}.
  *
  * <p>Endpoints: {@code GET /engineers}, {@code GET /engineers/{id}}, {@code POST /engineers?name=...},
  * {@code PUT /engineers/{id}?name=...}, {@code DELETE /engineers/{id}}.</p>
@@ -26,21 +22,8 @@ import java.util.List;
 @WebServlet("/engineers/*")
 public class EngineerServlet extends HttpServlet {
 
-    @Resource(name = "jdbc/myDS")
-    private DataSource dataSource;
-
-    private JdbcClient client;
-
-    @Override
-    public void init() throws ServletException {
-        try (var conn = dataSource.getConnection(); var stmt = conn.createStatement()) {
-            stmt.execute("CREATE TABLE IF NOT EXISTS engineers ("
-                    + "id BIGINT AUTO_INCREMENT PRIMARY KEY, name VARCHAR(255))");
-        } catch (SQLException e) {
-            throw new ServletException("Failed to initialize the engineers table", e);
-        }
-        this.client = new JdbcClient(dataSource);
-    }
+    @Inject
+    JdbcClient client;
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {

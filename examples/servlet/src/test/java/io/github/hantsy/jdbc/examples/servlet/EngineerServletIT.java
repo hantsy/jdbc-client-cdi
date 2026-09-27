@@ -4,7 +4,7 @@ import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.junit5.container.annotation.ArquillianTest;
 import org.jboss.arquillian.test.api.ArquillianResource;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
-import org.jboss.shrinkwrap.api.asset.StringAsset;
+import org.jboss.shrinkwrap.api.asset.EmptyAsset;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.jboss.shrinkwrap.resolver.api.maven.Maven;
 import org.junit.jupiter.api.Test;
@@ -14,51 +14,35 @@ import java.net.URL;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ArquillianTest
 public class EngineerServletIT {
+    private static final Logger LOGGER = Logger.getLogger(EngineerServletIT.class.getName());
+
+    @Deployment(testable = false)
+    public static WebArchive createDeployment() {
+        WebArchive archive = ShrinkWrap.create(WebArchive.class, "servlet-example.war")
+                .addClasses(
+                        DataSourceProducer.class,
+                        DatabaseInitializer.class,
+                        Engineer.class,
+                        EngineerServlet.class
+                )
+                .addAsWebInfResource("test-web.xml", "web.xml")
+                .addAsWebInfResource(EmptyAsset.INSTANCE, "beans.xml")
+                .addAsManifestResource("test-context.xml", "context.xml");
+        LOGGER.log(Level.INFO, "deployment archive: {0}", new Object[]{archive.toString(true)});
+        return archive;
+    }
 
     @ArquillianResource
     private URL baseUrl;
 
-    @Deployment(testable = false)
-    public static WebArchive createDeployment() {
-        var libs = Maven.resolver().loadPomFromFile("pom.xml")
-                .resolve("io.github.hantsy.jdbc:jdbc-client-core",
-                        "org.mariadb.jdbc:mariadb-java-client")
-                .withTransitivity()
-                .asFile();
-
-        String webXml = """
-                <?xml version="1.0" encoding="UTF-8"?>
-                <web-app xmlns="https://jakarta.ee/xml/ns/jakartaee" version="6.1">
-                  <resource-ref>
-                    <res-ref-name>jdbc/myDS</res-ref-name>
-                    <res-type>javax.sql.DataSource</res-type>
-                    <res-auth>Container</res-auth>
-                  </resource-ref>
-                </web-app>
-                """;
-
-        String contextXml = """
-                <Context>
-                  <Resource name="jdbc/myDS" auth="Container" type="javax.sql.DataSource"
-                            driverClassName="org.mariadb.jdbc.Driver"
-                            url="jdbc:mariadb://localhost:3306/servlet"
-                            username="root" password="root" maxTotal="8" maxIdle="4"/>
-                </Context>
-                """;
-
-        return ShrinkWrap.create(WebArchive.class, "servlet-example.war")
-                .addClass(EngineerServlet.class)
-                .addClass(Engineer.class)
-                .addAsLibraries(libs)
-                .addAsWebInfResource(new StringAsset(webXml), "web.xml")
-                .add(new StringAsset(contextXml), "META-INF/context.xml");
-    }
 
     @Test
     void crudOverHttp() throws Exception {

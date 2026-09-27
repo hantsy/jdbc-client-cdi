@@ -4,6 +4,7 @@ import javax.sql.DataSource;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.context.Initialized;
 import jakarta.enterprise.event.Observes;
+import jakarta.enterprise.event.Startup;
 import jakarta.inject.Inject;
 
 /**
@@ -15,7 +16,7 @@ public class DatabaseInitializer {
     @Inject
     private DataSource dataSource;
 
-    public void init(@Observes @Initialized(ApplicationScoped.class) Object event) throws Exception {
+    public void init(@Observes Startup event) throws Exception {
         try (var conn = dataSource.getConnection();
              var stmt = conn.createStatement()) {
             stmt.execute("CREATE TABLE IF NOT EXISTS engineers ("
