@@ -6,7 +6,6 @@ import org.jboss.arquillian.test.api.ArquillianResource;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.asset.EmptyAsset;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
-import org.jboss.shrinkwrap.resolver.api.maven.Maven;
 import org.junit.jupiter.api.Test;
 
 import java.net.URI;
@@ -23,6 +22,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @ArquillianTest
 public class EngineerServletIT {
     private static final Logger LOGGER = Logger.getLogger(EngineerServletIT.class.getName());
+    @ArquillianResource
+    private URL baseUrl;
 
     @Deployment(testable = false)
     public static WebArchive createDeployment() {
@@ -39,10 +40,6 @@ public class EngineerServletIT {
         LOGGER.log(Level.INFO, "deployment archive: {0}", new Object[]{archive.toString(true)});
         return archive;
     }
-
-    @ArquillianResource
-    private URL baseUrl;
-
 
     @Test
     void crudOverHttp() throws Exception {

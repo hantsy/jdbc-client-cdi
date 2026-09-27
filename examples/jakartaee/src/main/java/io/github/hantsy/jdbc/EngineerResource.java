@@ -3,6 +3,7 @@ package io.github.hantsy.jdbc;
 import io.github.hantsy.jdbc.support.GeneratedKeyHolder;
 import io.github.hantsy.jdbc.support.KeyHolder;
 
+import java.util.List;
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Consumes;
@@ -15,7 +16,6 @@ import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import java.util.List;
 
 /**
  * A minimal CRUD resource backed by a CDI-injected {@link JdbcClient}.

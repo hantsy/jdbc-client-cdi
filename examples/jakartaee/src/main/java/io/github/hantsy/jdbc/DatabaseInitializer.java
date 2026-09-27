@@ -2,7 +2,6 @@ package io.github.hantsy.jdbc;
 
 import javax.sql.DataSource;
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.enterprise.context.Initialized;
 import jakarta.enterprise.event.Observes;
 import jakarta.enterprise.event.Startup;
 import jakarta.inject.Inject;

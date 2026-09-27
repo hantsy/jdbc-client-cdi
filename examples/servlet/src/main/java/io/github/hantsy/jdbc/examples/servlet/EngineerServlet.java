@@ -4,14 +4,13 @@ import io.github.hantsy.jdbc.JdbcClient;
 import io.github.hantsy.jdbc.support.GeneratedKeyHolder;
 import io.github.hantsy.jdbc.support.KeyHolder;
 
+import java.io.IOException;
+import java.util.List;
 import jakarta.inject.Inject;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-
-import java.io.IOException;
-import java.util.List;
 
 /**
  * A minimal CRUD servlet backed by a CDI-injected {@link JdbcClient}.

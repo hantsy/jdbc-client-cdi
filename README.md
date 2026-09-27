@@ -10,13 +10,7 @@ The project is organized into three modules:
 - `jdbc-client-config`: optional MicroProfile Config integration.
 - `jdbc-client-cdi`: CDI producers for `JdbcClient` and converters.
 
-The [`examples`](examples/README.md) directory holds runnable examples (excluded
-from the main build):
-
-- `examples/vanilla`: plain (no CDI) usage of the core module.
-- `examples/javase`: core + CDI, bootstrapped with Weld SE.
-- `examples/servlet`: core in a Servlet container (Tomcat 11) with a JNDI DataSource.
-- `examples/jakartaee`: core + CDI + JAX-RS on GlassFish / WildFly.
+The [`examples`](examples/README.md) directory holds runnable examples.
 
 Start with the [reference documentation](https://hantsy.github.io/jdbc-client-cdi/) for installation, usage patterns,
 and configuration details.

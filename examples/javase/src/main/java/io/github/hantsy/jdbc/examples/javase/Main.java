@@ -6,8 +6,8 @@ import io.github.hantsy.jdbc.support.KeyHolder;
 import org.jboss.weld.environment.se.Weld;
 import org.jboss.weld.environment.se.WeldContainer;
 
-import javax.sql.DataSource;
 import java.util.List;
+import javax.sql.DataSource;
 
 /**
  * Bootstraps CDI with Weld SE, then uses the CDI-produced {@link JdbcClient} for a small CRUD demo.
