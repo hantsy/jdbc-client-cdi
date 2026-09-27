@@ -28,12 +28,18 @@ cd jdbc-client-cdi
 
 ## Project structure
 
-| Module    | Artifact             | Description                                                       |
-|-----------|----------------------|-------------------------------------------------------------------|
-| `core`    | `jdbc-client-core`   | The plain `JdbcClient` API; depends only on `javax.sql.DataSource`. |
-| `config`  | `jdbc-client-config` | Optional MicroProfile Config integration.                         |
-| `cdi`     | `jdbc-client-cdi`    | CDI producers for `JdbcClient` and the converter registry.        |
-| `examples`| —                    | Runnable examples, built separately from the main reactor.        |
+```
+.
+├── core/          # jdbc-client-core — the plain JdbcClient API (DataSource only)
+├── config/        # jdbc-client-config — MicroProfile Config integration
+├── cdi/           # jdbc-client-cdi — CDI producers for JdbcClient and converters
+├── examples/      # runnable examples (built separately from the main reactor)
+│   ├── vanilla/   # core only, no CDI
+│   ├── javase/    # core + cdi (Weld SE)
+│   ├── servlet/   # core + cdi (Tomcat 11)
+│   └── jakartaee/ # core + cdi + config (GlassFish / WildFly)
+└── docs/          # MkDocs reference documentation
+```
 
 The `examples` module is documented in [examples/README.md](examples/README.md).
 
