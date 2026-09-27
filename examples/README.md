@@ -10,7 +10,7 @@ workflow (one job per example).
 |--------------------------|-----------|-----------------------------|--------------------------------------------------------------------------------------------------------------------------|
 | [`vanilla`](vanilla)     | jar       | core, H2                    | The core `JdbcClient` with no CDI, backed by an in-memory H2 `DataSource`.                                               |
 | [`javase`](javase)       | jar       | core/cdi, H2                | The core + CDI modules, bootstrapped with Weld SE from a `main()` method.                                                |
-| [`servlet`](servlet)     | war       | core, MariaDB               | The core module in a Servlet container (Tomcat 11), with the `DataSource` provided via JNDI from `META-INF/context.xml`. |
+| [`servlet`](servlet)     | war       | core/cdi, MariaDB           | The core + CDI modules in a Servlet container (Tomcat 11), with the `DataSource` provided via JNDI from `META-INF/context.xml`. |
 | [`jakartaee`](jakartaee) | war       | core/cdi/config, PostgreSQL | The core + CDI modules behind a JAX-RS resource on GlassFish / WildFly, backed by PostgreSQL.                            |
 
 Each example keeps the same small CRUD story: get all, get by id, insert,
@@ -23,6 +23,12 @@ update, and delete an `Engineer`.
 - PostgreSQL on `localhost:5432` (only for the `jakartaee` example)
 - MariaDB on `localhost:3306` with a `servlet` database and `root`/`root`
   credentials (only for the `servlet` example)
+
+Start the databases with Docker Compose (same images/credentials as CI):
+
+```bash
+docker compose -f examples/docker-compose.yml up -d
+```
 
 Install the main modules once, so the examples can resolve `jdbc-client-*`:
 
