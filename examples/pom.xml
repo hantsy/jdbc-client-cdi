@@ -32,6 +32,9 @@
         <tomcat.version>11.0.26</tomcat.version>
         <weld.version>6.0.4.Final</weld.version>
 
+        <!-- Databases used by the examples. -->
+        <mariadb.version>3.5.10</mariadb.version>
+
         <!-- Tooling versions. -->
         <maven-war-plugin.version>3.5.1</maven-war-plugin.version>
         <arquillian-tomcat.version>1.2.5.Final</arquillian-tomcat.version>
@@ -75,6 +78,11 @@
                 <groupId>org.apache.tomcat</groupId>
                 <artifactId>tomcat-dbcp</artifactId>
                 <version>${tomcat.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.mariadb.jdbc</groupId>
+                <artifactId>mariadb-java-client</artifactId>
+                <version>${mariadb.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.jboss.arquillian.container</groupId>

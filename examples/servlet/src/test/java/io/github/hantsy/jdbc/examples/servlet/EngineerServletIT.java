@@ -28,7 +28,7 @@ public class EngineerServletIT {
     public static WebArchive createDeployment() {
         var libs = Maven.resolver().loadPomFromFile("pom.xml")
                 .resolve("io.github.hantsy.jdbc:jdbc-client-core",
-                        "com.h2database:h2")
+                        "org.mariadb.jdbc:mariadb-java-client")
                 .withTransitivity()
                 .asFile();
 
@@ -46,9 +46,9 @@ public class EngineerServletIT {
         String contextXml = """
                 <Context>
                   <Resource name="jdbc/myDS" auth="Container" type="javax.sql.DataSource"
-                            driverClassName="org.h2.Driver"
-                            url="jdbc:h2:mem:servlet;DB_CLOSE_DELAY=-1"
-                            username="sa" password="" maxTotal="8" maxIdle="4"/>
+                            driverClassName="org.mariadb.jdbc.Driver"
+                            url="jdbc:mariadb://localhost:3306/servlet"
+                            username="root" password="root" maxTotal="8" maxIdle="4"/>
                 </Context>
                 """;
 

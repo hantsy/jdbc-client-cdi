@@ -6,12 +6,12 @@ workflow (one job per example).
 
 ## Overview
 
-| Example                  | Packaging | Demonstrates                                                                                                             |
-|--------------------------|-----------|--------------------------------------------------------------------------------------------------------------------------|
-| [`vanilla`](vanilla)     | jar       | The core `JdbcClient` with no CDI, backed by an in-memory H2 `DataSource`.                                               |
-| [`javase`](javase)       | jar       | The core + CDI modules, bootstrapped with Weld SE from a `main()` method.                                                |
-| [`servlet`](servlet)     | war       | The core module in a Servlet container (Tomcat 11), with the `DataSource` provided via JNDI from `META-INF/context.xml`. |
-| [`jakartaee`](jakartaee) | war       | The core + CDI modules behind a JAX-RS resource on GlassFish / WildFly, backed by PostgreSQL.                            |
+| Example                  | Packaging | Modules + Database          | Demonstrates                                                                                                             |
+|--------------------------|-----------|-----------------------------|--------------------------------------------------------------------------------------------------------------------------|
+| [`vanilla`](vanilla)     | jar       | core, H2                    | The core `JdbcClient` with no CDI, backed by an in-memory H2 `DataSource`.                                               |
+| [`javase`](javase)       | jar       | core/cdi, H2                | The core + CDI modules, bootstrapped with Weld SE from a `main()` method.                                                |
+| [`servlet`](servlet)     | war       | core, MariaDB               | The core module in a Servlet container (Tomcat 11), with the `DataSource` provided via JNDI from `META-INF/context.xml`. |
+| [`jakartaee`](jakartaee) | war       | core/cdi/config, PostgreSQL | The core + CDI modules behind a JAX-RS resource on GlassFish / WildFly, backed by PostgreSQL.                            |
 
 Each example keeps the same small CRUD story: get all, get by id, insert,
 update, and delete an `Engineer`.
@@ -20,7 +20,9 @@ update, and delete an `Engineer`.
 
 - JDK 21+
 - Maven 3.9+ (or the included Maven wrapper `./mvnw`)
-- PostgreSQL running on `localhost:5432` (only for the `jakartaee` example)
+- PostgreSQL on `localhost:5432` (only for the `jakartaee` example)
+- MariaDB on `localhost:3306` with a `servlet` database and `root`/`root`
+  credentials (only for the `servlet` example)
 
 Install the main modules once, so the examples can resolve `jdbc-client-*`:
 
@@ -39,7 +41,7 @@ All examples are built from the `examples` reactor; select one with `-pl`.
 # javase — runs the weld-junit5 test
 ./mvnw -f examples/pom.xml -pl javase verify
 
-# servlet — runs the Arquillian integration tests on embedded Tomcat 11
+# servlet — runs the Arquillian integration tests (requires MariaDB)
 ./mvnw -f examples/pom.xml -pl servlet -Parq-tomcat-embedded verify
 
 # jakartaee — runs the Arquillian integration tests (requires PostgreSQL)
@@ -57,7 +59,7 @@ with a Maven profile; the `vanilla` and `javase` examples expose a `main`
 method that can be run from your IDE.
 
 ```bash
-# servlet on embedded Tomcat 11 (servlet mapped at /engineers)
+# servlet on embedded Tomcat 11 (servlet mapped at /engineers; requires MariaDB)
 ./mvnw -f examples/pom.xml -pl servlet -Ptomcat-embedded clean package cargo:run
 
 # jakartaee on GlassFish 8 (JAX-RS resource at /api/engineers)
