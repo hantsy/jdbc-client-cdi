@@ -4,11 +4,12 @@ A lightweight, framework-agnostic fluent JDBC client for Jakarta EE and CDI
 applications. It mirrors the developer experience of Spring's `JdbcClient`
 without requiring Spring.
 
-The project is organized into three modules:
+The project is organized into four modules:
 
 - `jdbc-client-core`: the core `JdbcClient` API and supporting types.
 - `jdbc-client-config`: optional MicroProfile Config integration.
 - `jdbc-client-cdi`: CDI producers for `JdbcClient` and converters.
+- `jdbc-client-tx`: resource-local transactions for Java SE and Servlet runtimes.
 
 The [`examples`](examples/README.md) directory holds runnable examples.
 

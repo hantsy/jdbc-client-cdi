@@ -42,6 +42,7 @@ import io.github.hantsy.jdbc.tx.resourcelocal.DataSourceTransactionManager;
 import io.github.hantsy.jdbc.tx.resourcelocal.TransactionAwareDataSourceProxy;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Produces;
+import jakarta.enterprise.inject.Typed;
 import jakarta.inject.Named;
 
 import javax.sql.DataSource;
@@ -53,8 +54,9 @@ public class DatabaseConfig {
 
     @Produces
     @Named("raw")
+    @Typed(HikariDataSource.class)
     @ApplicationScoped
-    public DataSource rawPool() {
+    public HikariDataSource rawPool() {
         return pool;
     }
 
@@ -71,6 +73,9 @@ public class DatabaseConfig {
     }
 }
 ```
+
+The raw pool is typed to its concrete class (`@Typed(HikariDataSource.class)`) so it does not become an
+ambiguous `@Default DataSource` candidate alongside the proxy.
 
 The manager and the proxy must share the **same raw pool** — the pool instance is the key that binds the
 transaction's `Connection` to the thread.

@@ -12,7 +12,7 @@ import jakarta.enterprise.inject.Produces;
  */
 @DataSourceDefinition(
         name = "java:comp/MyDS",
-        className = "org.postgresql.ds.PGSimpleDataSource", // org.postgresql.xa.PGXADataSource for JTA multiple ds
+        className = "org.postgresql.xa.PGXADataSource",
         url = "jdbc:postgresql://localhost:5432/postgres",
         user = "postgres",
         password = "postgres"
