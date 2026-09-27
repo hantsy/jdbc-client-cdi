@@ -3,7 +3,6 @@ package io.github.hantsy.jdbc.examples.vanilla;
 import io.github.hantsy.jdbc.JdbcClient;
 import io.github.hantsy.jdbc.support.GeneratedKeyHolder;
 import io.github.hantsy.jdbc.support.KeyHolder;
-import org.h2.jdbcx.JdbcDataSource;
 
 import java.util.List;
 
@@ -15,10 +14,7 @@ import java.util.List;
 public class VanillaExample {
 
     public static void main(String[] args) throws Exception {
-        JdbcDataSource ds = new JdbcDataSource();
-        ds.setURL("jdbc:h2:mem:vanilla;DB_CLOSE_DELAY=-1");
-        ds.setUser("sa");
-        ds.setPassword("");
+        var ds = Utils.newDataSource();
 
         JdbcClient client = new JdbcClient(ds);
         try (var conn = ds.getConnection(); var stmt = conn.createStatement()) {
