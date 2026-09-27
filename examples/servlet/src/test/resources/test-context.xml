@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Tomcat reads this webapp-specific context and registers the DataSource under java:comp/env/jdbc/myDS. -->
+<Context>
+    <Resource name="jdbc/myDS"
+              auth="Container"
+              type="javax.sql.DataSource"
+              driverClassName="org.mariadb.jdbc.Driver"
+              url="jdbc:mariadb://localhost:3306/servlet"
+              username="root"
+              password="root"
+              maxTotal="8"
+              maxIdle="4"/>
+    <Resource name="BeanManager"
+              auth="Container"
+              type="jakarta.enterprise.inject.spi.BeanManager"
+              factory="org.jboss.weld.resources.ManagerObjectFactory"/>
+</Context>
