@@ -37,8 +37,9 @@ public class JdbcClientIT {
     public static WebArchive createDeployment() {
         var libs = Maven.resolver().loadPomFromFile("pom.xml")
                 .resolve("org.postgresql:postgresql",
-                        "io.github.fludakit:fluda-jdbc-cdi",
-                        "io.github.fludakit:fluda-jdbc-config"
+                        "io.github.fludakit:fluda-jdbc-client-core",
+                        "io.github.fludakit:fluda-jdbc-client-cdi",
+                        "io.github.fludakit:fluda-jdbc-client-config"
                 )
                 .withTransitivity()
                 .asFile();
