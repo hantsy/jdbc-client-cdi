@@ -1,14 +1,16 @@
-# Fluent JDBC Client for Jakarta EE/CDI
+# FluDa: Fluent Data Toolkit for Jakarta EE/CDI
 
-A lightweight, framework-agnostic fluent JDBC client for Jakarta EE and CDI
-applications. It mirrors the developer experience of Spring's `JdbcClient`
-without requiring Spring.
+FluDa(**Flu**ent **Da**ta Toolkit for Jakarta EE/CDI) is a lightweight, modular data-access suite designed specifically for standard Jakarta EE and CDI environments. It provides a developer-friendly, fluent programming model that mirrors modern data APIs without requiring full-blown Spring frameworks or introducing bulky, legacy dependencies. The toolkit is organized into three standalone, high-level core feature pillars:
 
-The project is organized into three modules:
+* **JDBC Client**(`fluda-jdbc-client`): A lightweight, type-safe, fluent query engine built directly over JDBC.
+* **Resource Local Transaction Support** (`fluda-tx`): Container-agnostic declarative and programmatic transaction boundaries backed directly by a standard DataSource or JPA. (*coming soon*)
+* **SQL Initialization** (`fluda-sql-init`): Automates database schema management and data population on application startup. (*coming soon*)
 
-- `jdbc-client-core`: the core `JdbcClient` API and supporting types.
-- `jdbc-client-config`: optional MicroProfile Config integration.
-- `jdbc-client-cdi`: CDI producers for `JdbcClient` and converters.
+The `jdbc-client` module is organized into three submodules:
+
+- `fluda-jdbc-client-core`: the core `JdbcClient` API and supporting types.
+- `fluda-jdbc-client-config`: optional MicroProfile Config integration.
+- `fluda-jdbc-client-cdi`: CDI producers for `JdbcClient` and converters.
 
 The [`examples`](examples/README.md) directory holds runnable examples.
 
@@ -17,7 +19,7 @@ The [`examples`](examples/README.md) directory holds runnable examples.
 ### Creating a `JdbcClient`
 
 ```java
-import io.github.hantsy.jdbc.JdbcClient;
+import io.github.fludakit.jdbc.JdbcClient;
 
 import javax.sql.DataSource;
 

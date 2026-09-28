@@ -30,7 +30,7 @@ Start the databases with Docker Compose (same images/credentials as CI):
 docker compose -f examples/docker-compose.yml up -d
 ```
 
-Install the main modules once, so the examples can resolve `jdbc-client-*`:
+Install the main modules once, so the examples can resolve `fluda-*`:
 
 ```bash
 ./mvnw install -DskipTests

@@ -5,22 +5,22 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>io.github.hantsy.jdbc</groupId>
-        <artifactId>jdbc-client-examples</artifactId>
+        <groupId>io.github.fludakit</groupId>
+        <artifactId>fluda-examples</artifactId>
         <version>1.0.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>jdbc-client-example-vanilla</artifactId>
+    <artifactId>fluda-example-vanilla</artifactId>
     <packaging>jar</packaging>
 
-    <name>jdbc-client-example-vanilla</name>
+    <name>FluDa :: Examples :: Vanilla</name>
     <description>Plain (no CDI) example using the core module with an H2 DataSource.</description>
 
     <dependencies>
         <dependency>
-            <groupId>io.github.hantsy.jdbc</groupId>
-            <artifactId>jdbc-client-core</artifactId>
+            <groupId>io.github.fludakit</groupId>
+            <artifactId>fluda-jdbc-client-core</artifactId>
         </dependency>
         <dependency>
             <groupId>com.h2database</groupId>

@@ -5,16 +5,16 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>io.github.hantsy.jdbc</groupId>
-        <artifactId>jdbc-client-parent</artifactId>
+        <groupId>io.github.fludakit</groupId>
+        <artifactId>fluda-parent</artifactId>
         <version>1.0.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>jdbc-client-examples</artifactId>
+    <artifactId>fluda-examples</artifactId>
     <packaging>pom</packaging>
 
-    <name>jdbc-client-examples</name>
+    <name>FluDa :: Examples</name>
     <description>Runnable examples for the fluent JDBC client, built separately from the main reactor.</description>
 
     <modules>

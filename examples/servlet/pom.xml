@@ -5,16 +5,16 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>io.github.hantsy.jdbc</groupId>
-        <artifactId>jdbc-client-examples</artifactId>
+        <groupId>io.github.fludakit</groupId>
+        <artifactId>fluda-examples</artifactId>
         <version>1.0.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>jdbc-client-example-servlet</artifactId>
+    <artifactId>fluda-example-servlet</artifactId>
     <packaging>war</packaging>
 
-    <name>jdbc-client-example-servlet</name>
+    <name>FluDa :: Examples :: Servlet</name>
     <description>Servlet container example: a plain HttpServlet backed by the core JdbcClient and a JNDI DataSource on
         Tomcat 11.
     </description>
@@ -25,8 +25,8 @@
 
     <dependencies>
         <dependency>
-            <groupId>io.github.hantsy.jdbc</groupId>
-            <artifactId>jdbc-client-cdi</artifactId>
+            <groupId>io.github.fludakit</groupId>
+            <artifactId>fluda-jdbc-client-cdi</artifactId>
         </dependency>
         <dependency>
             <groupId>jakarta.servlet</groupId>

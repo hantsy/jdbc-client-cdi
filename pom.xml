@@ -4,19 +4,19 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>io.github.hantsy.jdbc</groupId>
-    <artifactId>jdbc-client-parent</artifactId>
+    <groupId>io.github.fludakit</groupId>
+    <artifactId>fluda-parent</artifactId>
     <version>1.0.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
-    <name>Fluent JDBC Client for Jakarta EE/CDI</name>
+    <name>FluDa</name>
     <description>A lightweight, framework-agnostic fluent JDBC client for Jakarta EE / CDI applications.</description>
     <url>https://github.com/hantsy/jdbc-client-cdi</url>
 
     <licenses>
         <license>
             <name>The Apache License, Version 2.0</name>
-            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
         </license>
     </licenses>
 
@@ -35,9 +35,7 @@
     </scm>
 
     <modules>
-        <module>core</module>
-        <module>config</module>
-        <module>cdi</module>
+        <module>jdbc-client</module>
         <module>examples</module>
     </modules>
 
@@ -83,18 +81,18 @@
         <dependencies>
             <!-- project modules -->
             <dependency>
-                <groupId>io.github.hantsy.jdbc</groupId>
-                <artifactId>jdbc-client-core</artifactId>
+                <groupId>io.github.fludakit</groupId>
+                <artifactId>fluda-jdbc-client-core</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>io.github.hantsy.jdbc</groupId>
-                <artifactId>jdbc-client-config</artifactId>
+                <groupId>io.github.fludakit</groupId>
+                <artifactId>fluda-jdbc-client-config</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>io.github.hantsy.jdbc</groupId>
-                <artifactId>jdbc-client-cdi</artifactId>
+                <groupId>io.github.fludakit</groupId>
+                <artifactId>fluda-jdbc-client-cdi</artifactId>
                 <version>${project.version}</version>
             </dependency>
 

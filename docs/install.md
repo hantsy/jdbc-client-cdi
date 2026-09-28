@@ -17,8 +17,8 @@ Use the following dependency when only the core fluent `JdbcClient` API is requi
 ```xml
 
 <dependency>
-    <groupId>io.github.hantsy.jdbc</groupId>
-    <artifactId>jdbc-client-core</artifactId>
+    <groupId>io.github.fludakit</groupId>
+    <artifactId>fluda-jdbc-client-core</artifactId>
     <version>1.0.0-SNAPSHOT</version>
 </dependency>
 ```
@@ -33,8 +33,8 @@ For a CDI-managed `JdbcClient`, add the CDI artifact:
 ```xml
 
 <dependency>
-    <groupId>io.github.hantsy.jdbc</groupId>
-    <artifactId>jdbc-client-cdi</artifactId>
+    <groupId>io.github.fludakit</groupId>
+    <artifactId>fluda-jdbc-client-cdi</artifactId>
     <version>1.0.0-SNAPSHOT</version>
 </dependency>
 ```
@@ -48,8 +48,8 @@ To configure the library from MicroProfile Config properties, add the optional c
 ```xml
 
 <dependency>
-    <groupId>io.github.hantsy.jdbc</groupId>
-    <artifactId>jdbc-client-config</artifactId>
+    <groupId>io.github.fludakit</groupId>
+    <artifactId>fluda-jdbc-client-config</artifactId>
     <version>1.0.0-SNAPSHOT</version>
 </dependency>
 ```
