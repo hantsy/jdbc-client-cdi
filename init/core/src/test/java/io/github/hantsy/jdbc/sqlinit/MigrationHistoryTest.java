@@ -1,9 +1,10 @@
 package io.github.hantsy.jdbc.sqlinit;
 
+import io.github.hantsy.jdbc.sqlinit.resource.FileSystemResource;
+import io.github.hantsy.jdbc.sqlinit.resource.Resource;
 import org.h2.jdbcx.JdbcDataSource;
 import org.junit.jupiter.api.Test;
 
-import java.net.URL;
 import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -37,13 +38,8 @@ class MigrationHistoryTest {
         }
     }
 
-    private static Resource resource(String name) throws SQLException {
-        try {
-            URL url = Path.of("unused-" + name).toUri().toURL();
-            return new Resource(name, url);
-        } catch (Exception e) {
-            throw new SQLException(e);
-        }
+    private static Resource resource(String name) {
+        return new FileSystemResource(Path.of(name));
     }
 
     private static DataSource h2(String database) {

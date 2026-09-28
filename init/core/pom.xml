@@ -48,6 +48,7 @@
                                     <name>io.github.hantsy.jdbc.sqlinit.core</name>
                                     <exports>
                                         io.github.hantsy.jdbc.sqlinit;
+                                        io.github.hantsy.jdbc.sqlinit.resource;
                                     </exports>
                                     <opens>
                                         io.github.hantsy.jdbc.sqlinit;

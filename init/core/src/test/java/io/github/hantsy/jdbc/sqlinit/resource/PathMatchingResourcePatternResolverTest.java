@@ -1,4 +1,4 @@
-package io.github.hantsy.jdbc.sqlinit;
+package io.github.hantsy.jdbc.sqlinit.resource;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -9,7 +9,6 @@ import java.net.URLClassLoader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.sql.SQLException;
 import java.util.List;
 import java.util.jar.JarEntry;
 import java.util.jar.JarOutputStream;
@@ -17,31 +16,33 @@ import java.util.jar.JarOutputStream;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-class ScriptLocatorTest {
+class PathMatchingResourcePatternResolverTest {
+
+    private final PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
 
     @Test
-    void resolvesAClasspathDirectoryRecursively() throws SQLException {
-        List<Resource> resources = new ScriptLocator().resolve(List.of("classpath:db/migration"));
+    void resolvesAClasspathDirectoryRecursively() throws IOException {
+        List<Resource> resources = resolver.getResources("classpath:db/migration");
         assertEquals(List.of("V1__create.sql", "V2__second.sql", "V3__third.sql"),
-                resources.stream().map(Resource::fileName).toList());
+                resources.stream().map(Resource::getFilename).toList());
     }
 
     @Test
-    void resolvesAClasspathPattern() throws SQLException {
-        List<Resource> resources = new ScriptLocator().resolve(List.of("classpath:db/migration/**/*.sql"));
+    void resolvesAClasspathPattern() throws IOException {
+        List<Resource> resources = resolver.getResources("classpath:db/migration/**/*.sql");
         assertEquals(List.of("V1__create.sql", "V2__second.sql", "V3__third.sql"),
-                resources.stream().map(Resource::fileName).toList());
+                resources.stream().map(Resource::getFilename).toList());
     }
 
     @Test
-    void resolvesALiteralClasspathFile() throws SQLException {
-        List<Resource> resources = new ScriptLocator().resolve(List.of("classpath:db/migration/V1__create.sql"));
-        assertEquals(List.of("V1__create.sql"), resources.stream().map(Resource::fileName).toList());
+    void resolvesALiteralClasspathFile() throws IOException {
+        List<Resource> resources = resolver.getResources("classpath:db/migration/V1__create.sql");
+        assertEquals(List.of("V1__create.sql"), resources.stream().map(Resource::getFilename).toList());
     }
 
     @Test
     void failsWhenALiteralClasspathFileIsMissing() {
-        assertThrows(SQLException.class, () -> new ScriptLocator().resolve(List.of("classpath:db/nope.sql")));
+        assertThrows(IOException.class, () -> resolver.getResources("classpath:db/nope.sql"));
     }
 
     @Test
@@ -52,10 +53,10 @@ class ScriptLocatorTest {
         Files.createDirectory(tempDir.resolve("nested"));
         Files.writeString(tempDir.resolve("nested/V3__c.sql"), "SELECT 3");
 
-        List<Resource> resources = new ScriptLocator().resolve(List.of("filesystem:" + tempDir));
+        List<Resource> resources = resolver.getResources("filesystem:" + tempDir);
 
         assertEquals(List.of("V1__a.sql", "V2__b.sql", "V3__c.sql"),
-                resources.stream().map(Resource::fileName).toList());
+                resources.stream().map(Resource::getFilename).toList());
     }
 
     @Test
@@ -74,9 +75,10 @@ class ScriptLocatorTest {
                 ClassLoader.getPlatformClassLoader())) {
             Thread.currentThread().setContextClassLoader(loader);
             try {
-                List<Resource> resources = new ScriptLocator().resolve(List.of("classpath:db/migration"));
+                List<Resource> resources = new PathMatchingResourcePatternResolver()
+                        .getResources("classpath:db/migration");
                 assertEquals(List.of("V1__create.sql", "V2__second.sql"),
-                        resources.stream().map(Resource::fileName).toList());
+                        resources.stream().map(Resource::getFilename).toList());
             } finally {
                 Thread.currentThread().setContextClassLoader(original);
             }

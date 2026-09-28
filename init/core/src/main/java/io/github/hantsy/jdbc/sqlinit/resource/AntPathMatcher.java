@@ -1,22 +1,21 @@
-package io.github.hantsy.jdbc.sqlinit;
+package io.github.hantsy.jdbc.sqlinit.resource;
 
 /**
- * Ant-style path matching over {@code /} separated classpath resource paths.
+ * Ant-style path matching over {@code /} separated resource paths.
  *
  * <p>{@code ?} matches a single character, {@code *} matches any run of characters inside one path
  * segment, and {@code **} matches any number of segments including none.</p>
  */
-final class AntPathMatcher {
+public class AntPathMatcher implements PathMatcher {
 
-    private AntPathMatcher() {
-    }
-
-    static boolean match(String pattern, String path) {
-        return matchSegments(split(pattern), 0, split(path), 0);
-    }
-
-    static boolean isPattern(String path) {
+    @Override
+    public boolean isPattern(String path) {
         return path.indexOf('*') >= 0 || path.indexOf('?') >= 0;
+    }
+
+    @Override
+    public boolean match(String pattern, String path) {
+        return matchSegments(split(pattern), 0, split(path), 0);
     }
 
     private static String[] split(String path) {

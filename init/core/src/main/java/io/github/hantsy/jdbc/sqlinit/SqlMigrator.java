@@ -10,11 +10,15 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import io.github.hantsy.jdbc.sqlinit.resource.PathMatchingResourcePatternResolver;
+import io.github.hantsy.jdbc.sqlinit.resource.Resource;
+import io.github.hantsy.jdbc.sqlinit.resource.ResourcePatternResolver;
 import javax.sql.DataSource;
 
 /**
@@ -78,13 +82,28 @@ public final class SqlMigrator {
     }
 
     private List<Migration> resolve() throws SQLException {
-        List<Resource> resources = new ScriptLocator().resolve(config.scriptLocations());
+        ResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
+        Map<String, Resource> byFilename = new LinkedHashMap<>();
+        for (String location : config.scriptLocations()) {
+            List<Resource> found;
+            try {
+                found = resolver.getResources(location);
+            } catch (IOException e) {
+                throw new SQLException("Failed to resolve SQL script location: " + location, e);
+            }
+            for (Resource resource : found) {
+                byFilename.putIfAbsent(resource.getFilename(), resource);
+            }
+        }
+        List<Resource> resources = new ArrayList<>(byFilename.values());
+        resources.sort(Comparator.comparing(Resource::getFilename));
+
         List<Migration> migrations = new ArrayList<>();
         for (Resource resource : resources) {
-            Matcher matcher = MIGRATION_NAME.matcher(resource.fileName());
+            Matcher matcher = MIGRATION_NAME.matcher(resource.getFilename());
             if (!matcher.matches()) {
                 LOGGER.warning(() -> "Ignoring SQL script that does not match V<version>__<description>.sql: "
-                        + resource.fileName());
+                        + resource.getFilename());
                 continue;
             }
             int version = Integer.parseInt(matcher.group(1));
@@ -154,7 +173,7 @@ public final class SqlMigrator {
 
     private void executeScript(Connection connection, Migration migration) throws SQLException {
         List<String> statements;
-        try (InputStream in = migration.resource().open();
+        try (InputStream in = migration.resource().getInputStream();
              Reader reader = new InputStreamReader(in, StandardCharsets.UTF_8)) {
             statements = SqlScriptParser.parse(reader, config.separator());
         } catch (IOException e) {
