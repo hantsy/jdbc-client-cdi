@@ -8,13 +8,11 @@ import java.util.List;
 public class SqlInitConfig {
 
     public static final String DEFAULT_SEPARATOR = ";";
-    public static final String DEFAULT_HISTORY_TABLE = "sqlinit_migration";
     public static final String DEFAULT_SCRIPT_LOCATION = "classpath:db/migration";
 
     private final List<String> scriptLocations;
     private final String separator;
-    private final String platform;
-    private final String historyTable;
+    private final String dbType;
 
     /**
      * No-arg constructor required for CDI client proxies.
@@ -22,15 +20,13 @@ public class SqlInitConfig {
     public SqlInitConfig() {
         this.scriptLocations = List.of(DEFAULT_SCRIPT_LOCATION);
         this.separator = DEFAULT_SEPARATOR;
-        this.platform = null;
-        this.historyTable = DEFAULT_HISTORY_TABLE;
+        this.dbType = null;
     }
 
     private SqlInitConfig(Builder builder) {
         this.scriptLocations = List.copyOf(builder.scriptLocations);
         this.separator = builder.separator;
-        this.platform = builder.platform;
-        this.historyTable = builder.historyTable;
+        this.dbType = builder.dbType;
     }
 
     public static SqlInitConfig defaults() {
@@ -51,22 +47,16 @@ public class SqlInitConfig {
         return separator;
     }
 
-    /** The configured database platform, or {@code null} to auto-detect it from the connection. */
-    public String platform() {
-        return platform;
-    }
-
-    /** The name of the migration history table (default {@code sqlinit_migration}). */
-    public String historyTable() {
-        return historyTable;
+    /** The configured database type, or {@code null} to auto-detect it from the connection. */
+    public String dbType() {
+        return dbType;
     }
 
     public static final class Builder {
 
         private List<String> scriptLocations = List.of(DEFAULT_SCRIPT_LOCATION);
         private String separator = DEFAULT_SEPARATOR;
-        private String platform;
-        private String historyTable = DEFAULT_HISTORY_TABLE;
+        private String dbType;
 
         public Builder scriptLocations(List<String> scriptLocations) {
             this.scriptLocations = scriptLocations;
@@ -78,13 +68,8 @@ public class SqlInitConfig {
             return this;
         }
 
-        public Builder platform(String platform) {
-            this.platform = platform;
-            return this;
-        }
-
-        public Builder historyTable(String historyTable) {
-            this.historyTable = historyTable;
+        public Builder dbType(String dbType) {
+            this.dbType = dbType;
             return this;
         }
 

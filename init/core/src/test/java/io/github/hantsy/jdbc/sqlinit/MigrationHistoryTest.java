@@ -21,7 +21,7 @@ class MigrationHistoryTest {
         DataSource dataSource = h2("history");
         try (Connection connection = dataSource.getConnection()) {
             connection.setAutoCommit(true);
-            MigrationHistory history = new MigrationHistory(connection, DatabasePlatform.H2, "sqlinit_migration");
+            MigrationHistory history = new MigrationHistory(connection, DbType.H2);
 
             history.ensureTable();
             assertTrue(history.applied().isEmpty());

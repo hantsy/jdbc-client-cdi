@@ -26,7 +26,6 @@ class SqlInitConfigProducerTest {
         assertNotNull(config);
         assertEquals("/", config.separator());
         assertEquals(List.of("classpath:db/migration", "filesystem:/opt/sql"), config.scriptLocations());
-        assertEquals("h2", config.platform());
-        assertEquals("custom_migrations", config.historyTable());
+        assertEquals("h2", config.dbType());
     }
 }

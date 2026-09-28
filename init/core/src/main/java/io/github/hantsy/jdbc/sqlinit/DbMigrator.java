@@ -1,5 +1,9 @@
 package io.github.hantsy.jdbc.sqlinit;
 
+import io.github.hantsy.jdbc.sqlinit.resource.PathMatchingResourcePatternResolver;
+import io.github.hantsy.jdbc.sqlinit.resource.Resource;
+import io.github.hantsy.jdbc.sqlinit.resource.ResourcePatternResolver;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -16,9 +20,6 @@ import java.util.Map;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import io.github.hantsy.jdbc.sqlinit.resource.PathMatchingResourcePatternResolver;
-import io.github.hantsy.jdbc.sqlinit.resource.Resource;
-import io.github.hantsy.jdbc.sqlinit.resource.ResourcePatternResolver;
 import javax.sql.DataSource;
 
 /**
@@ -29,19 +30,19 @@ import javax.sql.DataSource;
  * {@code running} row (atomic via the {@code version} primary key), executed in its own
  * transaction, then marked {@code succeeded} or {@code failed}.</p>
  */
-public final class SqlMigrator {
+public final class DbMigrator {
 
-    private static final Logger LOGGER = Logger.getLogger(SqlMigrator.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(DbMigrator.class.getName());
     private static final Pattern MIGRATION_NAME = Pattern.compile("V(\\d+)__(.+)\\.sql");
 
     private final DataSource dataSource;
     private final SqlInitConfig config;
 
-    public SqlMigrator(DataSource dataSource) {
+    public DbMigrator(DataSource dataSource) {
         this(dataSource, SqlInitConfig.defaults());
     }
 
-    public SqlMigrator(DataSource dataSource, SqlInitConfig config) {
+    public DbMigrator(DataSource dataSource, SqlInitConfig config) {
         this.dataSource = dataSource;
         this.config = config;
     }
@@ -61,7 +62,7 @@ public final class SqlMigrator {
 
         try (Connection connection = dataSource.getConnection()) {
             connection.setAutoCommit(true);
-            MigrationHistory history = new MigrationHistory(connection, platform(connection), config.historyTable());
+            MigrationHistory history = new MigrationHistory(connection, dbType(connection));
             history.ensureTable();
 
             Map<Integer, String> applied = history.applied();
@@ -120,15 +121,15 @@ public final class SqlMigrator {
         return migrations;
     }
 
-    private DatabasePlatform platform(Connection connection) throws SQLException {
-        if (config.platform() != null) {
+    private DbType dbType(Connection connection) throws SQLException {
+        if (config.dbType() != null) {
             try {
-                return DatabasePlatform.fromName(config.platform());
+                return DbType.fromName(config.dbType());
             } catch (IllegalArgumentException e) {
                 throw new SQLException(e.getMessage(), e);
             }
         }
-        return DatabasePlatform.detect(connection.getMetaData().getDatabaseProductName(),
+        return DbType.detect(connection.getMetaData().getDatabaseProductName(),
                 connection.getMetaData().getURL());
     }
 
@@ -136,7 +137,7 @@ public final class SqlMigrator {
         for (Map.Entry<Integer, String> entry : applied.entrySet()) {
             if (!MigrationHistory.STATUS_SUCCEEDED.equals(entry.getValue())) {
                 throw new SQLException("Migration V" + entry.getKey() + " is in state '" + entry.getValue()
-                        + "'; fix or remove the " + config.historyTable() + " row before restarting");
+                        + "'; fix or remove the " + MigrationHistory.TABLE_NAME + " row before restarting");
             }
         }
     }

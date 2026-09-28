@@ -5,7 +5,7 @@ artifacts that mirror the `jdbc-client` modules, so an application can take only
 
 | Artifact                     | Contents                                                                  |
 |------------------------------|---------------------------------------------------------------------------|
-| `jdbc-client-sql-init-core`  | `SqlMigrator`, `SqlInitConfig`, `DatabasePlatform`, `SqlScriptParser`. JDK only. |
+| `jdbc-client-sql-init-core`  | `DbMigrator`, `SqlInitConfig`, `DbType`, `SqlScriptParser`. JDK only. |
 | `jdbc-client-sql-init-cdi`   | The `@SqlInit` qualifier and a portable CDI extension that runs at startup. |
 | `jdbc-client-sql-init-config`| `SqlInitConfig` produced from `jdbcclient.init.*` MicroProfile Config values. |
 
@@ -21,10 +21,10 @@ The `cdi` and `config` artifacts pull in the core one.
 
 ## Running from Java SE
 
-`SqlMigrator` needs nothing but a `DataSource`:
+`DbMigrator` needs nothing but a `DataSource`:
 
 ```java
-new SqlMigrator(dataSource).migrate();
+new DbMigrator(dataSource).migrate();
 ```
 
 That scans the default location `classpath:db/migration` for scripts named `V<version>__<description>.sql`
@@ -33,9 +33,9 @@ and applies the ones that have not run yet. Pass an explicit `SqlInitConfig` to 
 ```java
 SqlInitConfig config = SqlInitConfig.builder()
         .scriptLocations(List.of("classpath:db/migration", "filesystem:/opt/sql/migration"))
-        .platform("postgresql")
+        .dbType("postgresql")
         .build();
-new SqlMigrator(dataSource, config).migrate();
+new DbMigrator(dataSource, config).migrate();
 ```
 
 `migrate()` declares `throws SQLException`, so a Java SE caller decides whether a failed migration is fatal.
@@ -62,8 +62,7 @@ pattern are ignored. Each script runs exactly once, in its own transaction, trac
 |-----------------------------------|----------------------:|-------------|
 | `jdbcclient.init.script-locations`| `classpath:db/migration` | Comma-separated locations to scan. |
 | `jdbcclient.init.separator`       |                   `;` | Character sequence that terminates a statement. |
-| `jdbcclient.init.platform`        | *(auto-detected)*     | `h2`, `postgresql` (or `pg`), `mysql` (or `mariadb`), `mssql`, `oracle`. |
-| `jdbcclient.init.history-table`   | `sqlinit_migration`   | Name of the migration history table. |
+| `jdbcclient.init.db-type`         | *(auto-detected)*     | `h2`, `postgresql` (or `pg`), `mysql` (or `mariadb`), `mssql`, `oracle`. |
 
 ## Location syntax
 
@@ -94,11 +93,12 @@ DELIMITER ;
 
 ## History table and failures
 
-Each applied migration is recorded in the history table with a `status` of `running`, `succeeded`, or `failed`.
-A migration is claimed by inserting a `running` row, executed in its own transaction, then marked `succeeded`.
-If a script fails, its transaction is rolled back and the row is marked `failed` with the error message; a
-`failed` or leftover `running` row stops the next startup, because re-running against partial state is unsafe.
-Engines that commit implicitly on DDL (MySQL and MariaDB among them) cannot roll back a schema script, so treat
-such scripts as forward-only there.
+Migrations are tracked in a fixed `db_migrations` history table, whose dialect-specific `CREATE TABLE` statement
+is loaded from the classpath resource `/sqlinit/init-<db_type>.sql` selected by the `db-type`. Each applied
+migration is recorded with a `status` of `running`, `succeeded`, or `failed`. A migration is claimed by inserting
+a `running` row, executed in its own transaction, then marked `succeeded`. If a script fails, its transaction is
+rolled back and the row is marked `failed` with the error message; a `failed` or leftover `running` row stops the
+next startup, because re-running against partial state is unsafe. Engines that commit implicitly on DDL (MySQL
+and MariaDB among them) cannot roll back a schema script, so treat such scripts as forward-only there.
 
 For query execution once the database is initialized, continue with [querying and result mapping](querying.md).

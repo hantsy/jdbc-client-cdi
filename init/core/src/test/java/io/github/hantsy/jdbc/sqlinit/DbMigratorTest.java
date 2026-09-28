@@ -15,29 +15,29 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class SqlMigratorTest {
+class DbMigratorTest {
 
     @Test
     void appliesVersionedMigrationsInOrder() throws SQLException {
         DataSource dataSource = h2("order");
 
-        new SqlMigrator(dataSource).migrate();
+        new DbMigrator(dataSource).migrate();
 
         assertEquals(List.of("V2", "V3"), query(dataSource, "SELECT script FROM applied_scripts ORDER BY seq"));
         assertEquals(List.of("1", "2", "3"),
-                query(dataSource, "SELECT version FROM sqlinit_migration ORDER BY version"));
+                query(dataSource, "SELECT version FROM db_migrations ORDER BY version"));
     }
 
     @Test
     void skipsAlreadyAppliedMigrations() throws SQLException {
         DataSource dataSource = h2("skip");
-        SqlMigrator migrator = new SqlMigrator(dataSource);
+        DbMigrator migrator = new DbMigrator(dataSource);
 
         migrator.migrate();
         migrator.migrate();
 
         assertEquals(List.of("1", "2", "3"),
-                query(dataSource, "SELECT version FROM sqlinit_migration ORDER BY version"));
+                query(dataSource, "SELECT version FROM db_migrations ORDER BY version"));
         assertEquals(List.of("V2", "V3"), query(dataSource, "SELECT script FROM applied_scripts ORDER BY seq"));
     }
 
@@ -51,9 +51,9 @@ class SqlMigratorTest {
                 .scriptLocations(List.of("classpath:db/failing-migration"))
                 .build();
 
-        assertThrows(SQLException.class, () -> new SqlMigrator(dataSource, config).migrate());
+        assertThrows(SQLException.class, () -> new DbMigrator(dataSource, config).migrate());
 
-        assertEquals(List.of("failed"), query(dataSource, "SELECT status FROM sqlinit_migration WHERE version = 1"));
+        assertEquals(List.of("failed"), query(dataSource, "SELECT status FROM db_migrations WHERE version = 1"));
         assertEquals(List.of("0"), query(dataSource, "SELECT CAST(COUNT(*) AS VARCHAR) FROM ok_table"));
     }
 
@@ -61,13 +61,13 @@ class SqlMigratorTest {
     void failsWhenALeftoverRunningRowExists() throws SQLException {
         DataSource dataSource = h2("running");
         try (Connection connection = dataSource.getConnection(); Statement statement = connection.createStatement()) {
-            statement.execute("CREATE TABLE sqlinit_migration (version INT PRIMARY KEY, description VARCHAR(200), "
+            statement.execute("CREATE TABLE db_migrations (version INT PRIMARY KEY, description VARCHAR(200), "
                     + "script VARCHAR(500), status VARCHAR(16), installed_on TIMESTAMP, error_message VARCHAR(1000))");
-            statement.execute("INSERT INTO sqlinit_migration (version, description, script, status, installed_on) "
+            statement.execute("INSERT INTO db_migrations (version, description, script, status, installed_on) "
                     + "VALUES (1, 'x', 'V1__x.sql', 'running', CURRENT_TIMESTAMP)");
         }
 
-        SQLException e = assertThrows(SQLException.class, () -> new SqlMigrator(dataSource).migrate());
+        SQLException e = assertThrows(SQLException.class, () -> new DbMigrator(dataSource).migrate());
 
         assertTrue(e.getMessage().contains("running"));
     }
@@ -79,7 +79,7 @@ class SqlMigratorTest {
                 .scriptLocations(List.of("classpath:db/duplicates"))
                 .build();
 
-        SQLException e = assertThrows(SQLException.class, () -> new SqlMigrator(dataSource, config).migrate());
+        SQLException e = assertThrows(SQLException.class, () -> new DbMigrator(dataSource, config).migrate());
 
         assertTrue(e.getMessage().contains("Duplicate migration version"));
     }

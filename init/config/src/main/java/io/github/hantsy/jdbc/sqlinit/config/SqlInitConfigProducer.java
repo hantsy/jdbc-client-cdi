@@ -24,22 +24,17 @@ public class SqlInitConfigProducer {
     private String separator;
 
     @Inject
-    @ConfigProperty(name = "jdbcclient.init.platform", defaultValue = "")
-    private String platform;
-
-    @Inject
-    @ConfigProperty(name = "jdbcclient.init.history-table", defaultValue = "sqlinit_migration")
-    private String historyTable;
+    @ConfigProperty(name = "jdbcclient.init.db-type", defaultValue = "")
+    private String dbType;
 
     @Produces
     @ApplicationScoped
     public SqlInitConfig produce() {
         SqlInitConfig.Builder builder = SqlInitConfig.builder()
                 .scriptLocations(scriptLocations)
-                .separator(separator)
-                .historyTable(historyTable);
-        if (platform != null && !platform.isBlank()) {
-            builder.platform(platform);
+                .separator(separator);
+        if (dbType != null && !dbType.isBlank()) {
+            builder.dbType(dbType);
         }
         return builder.build();
     }

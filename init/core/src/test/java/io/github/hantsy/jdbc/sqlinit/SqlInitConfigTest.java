@@ -15,8 +15,7 @@ class SqlInitConfigTest {
 
         assertEquals(List.of("classpath:db/migration"), config.scriptLocations());
         assertEquals(";", config.separator());
-        assertNull(config.platform());
-        assertEquals("sqlinit_migration", config.historyTable());
+        assertNull(config.dbType());
     }
 
     @Test
@@ -24,13 +23,11 @@ class SqlInitConfigTest {
         SqlInitConfig config = SqlInitConfig.builder()
                 .scriptLocations(List.of("classpath:db/migration", "filesystem:/opt/sql"))
                 .separator("/")
-                .platform("postgresql")
-                .historyTable("mig_history")
+                .dbType("postgresql")
                 .build();
 
         assertEquals(List.of("classpath:db/migration", "filesystem:/opt/sql"), config.scriptLocations());
         assertEquals("/", config.separator());
-        assertEquals("postgresql", config.platform());
-        assertEquals("mig_history", config.historyTable());
+        assertEquals("postgresql", config.dbType());
     }
 }
