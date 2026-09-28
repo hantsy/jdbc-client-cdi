@@ -1,7 +1,7 @@
 package io.github.hantsy.jdbc.sqlinit.cdi;
 
 import io.github.hantsy.jdbc.sqlinit.SqlInitConfig;
-import io.github.hantsy.jdbc.sqlinit.SqlScriptPopulator;
+import io.github.hantsy.jdbc.sqlinit.SqlMigrator;
 
 import java.sql.SQLException;
 import java.util.logging.Logger;
@@ -55,8 +55,8 @@ public class SqlInitExtension implements Extension {
             return;
         }
         Instance<SqlInitConfig> configs = cdi.select(SqlInitConfig.class);
-        SqlInitConfig config = configs.isResolvable() ? configs.get() : SqlInitConfig.DEFAULT;
-        new SqlScriptPopulator(dataSource, config).populate();
+        SqlInitConfig config = configs.isResolvable() ? configs.get() : SqlInitConfig.defaults();
+        new SqlMigrator(dataSource, config).migrate();
     }
 
     private DataSource dataSource(Instance<Object> beans) {
