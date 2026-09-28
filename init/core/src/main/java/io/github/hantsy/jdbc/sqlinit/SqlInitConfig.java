@@ -3,58 +3,83 @@ package io.github.hantsy.jdbc.sqlinit;
 import java.util.List;
 
 /**
- * Plain configuration for SQL script initialization.
+ * Immutable configuration for SQL migration initialization.
  */
-public class SqlInitConfig {
+public final class SqlInitConfig {
 
-    public static final SqlInitConfig DEFAULT = new SqlInitConfig(";", List.of("/schema.sql"), List.of("/data.sql"));
+    public static final String DEFAULT_SEPARATOR = ";";
+    public static final String DEFAULT_HISTORY_TABLE = "sqlinit_migration";
+    public static final String DEFAULT_SCRIPT_LOCATION = "classpath:db/migration";
 
-    private String separator;
-    private List<String> schemaLocations;
-    private List<String> dataLocations;
+    private final List<String> scriptLocations;
+    private final String separator;
+    private final String platform;
+    private final String historyTable;
 
-    /**
-     * No-arg constructor required for CDI client proxies.
-     */
-    public SqlInitConfig() {
+    private SqlInitConfig(Builder builder) {
+        this.scriptLocations = List.copyOf(builder.scriptLocations);
+        this.separator = builder.separator;
+        this.platform = builder.platform;
+        this.historyTable = builder.historyTable;
     }
 
-    public SqlInitConfig(String separator, List<String> schemaLocations, List<String> dataLocations) {
-        this.separator = separator;
-        this.schemaLocations = schemaLocations;
-        this.dataLocations = dataLocations;
+    public static SqlInitConfig defaults() {
+        return new Builder().build();
     }
 
-    /**
-     * The character sequence that terminates a statement inside a script (default {@code ;}).
-     *
-     * <p>Separators may be longer than one character, which is what a {@code DELIMITER} directive
-     * in a script switches to when it wraps a stored-procedure body.</p>
-     */
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    /** The script locations to scan for versioned migrations (default {@code classpath:db/migration}). */
+    public List<String> scriptLocations() {
+        return scriptLocations;
+    }
+
+    /** The statement separator passed to the script parser (default {@code ;}). */
     public String separator() {
         return separator;
     }
 
-    /**
-     * The classpath locations holding schema (DDL) scripts, executed before the data locations
-     * (default {@code /schema.sql}).
-     *
-     * <p>A location is either a literal classpath resource such as {@code classpath:/db/schema.sql}
-     * or an Ant-style pattern such as {@code classpath*:/db/migration/&#42;&#42;/&#42;.sql}. Scripts
-     * resolved from one location are executed in alphabetical order of their resource path.</p>
-     */
-    public List<String> schemaLocations() {
-        return schemaLocations;
+    /** The configured database platform, or {@code null} to auto-detect it from the connection. */
+    public String platform() {
+        return platform;
     }
 
-    /**
-     * The classpath locations holding data (DML) scripts, executed after the schema locations
-     * (default {@code /data.sql}).
-     *
-     * <p>Accepts the same literal paths and Ant-style patterns as
-     * {@link #schemaLocations()}.</p>
-     */
-    public List<String> dataLocations() {
-        return dataLocations;
+    /** The name of the migration history table (default {@code sqlinit_migration}). */
+    public String historyTable() {
+        return historyTable;
+    }
+
+    public static final class Builder {
+
+        private List<String> scriptLocations = List.of(DEFAULT_SCRIPT_LOCATION);
+        private String separator = DEFAULT_SEPARATOR;
+        private String platform;
+        private String historyTable = DEFAULT_HISTORY_TABLE;
+
+        public Builder scriptLocations(List<String> scriptLocations) {
+            this.scriptLocations = scriptLocations;
+            return this;
+        }
+
+        public Builder separator(String separator) {
+            this.separator = separator;
+            return this;
+        }
+
+        public Builder platform(String platform) {
+            this.platform = platform;
+            return this;
+        }
+
+        public Builder historyTable(String historyTable) {
+            this.historyTable = historyTable;
+            return this;
+        }
+
+        public SqlInitConfig build() {
+            return new SqlInitConfig(this);
+        }
     }
 }
