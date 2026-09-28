@@ -98,6 +98,21 @@
                 <artifactId>jdbc-client-cdi</artifactId>
                 <version>${project.version}</version>
             </dependency>
+            <dependency>
+                <groupId>io.github.hantsy.jdbc</groupId>
+                <artifactId>jdbc-client-sql-init-core</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.github.hantsy.jdbc</groupId>
+                <artifactId>jdbc-client-sql-init-cdi</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.github.hantsy.jdbc</groupId>
+                <artifactId>jdbc-client-sql-init-config</artifactId>
+                <version>${project.version}</version>
+            </dependency>
 
             <!-- BOMs -->
             <dependency>
