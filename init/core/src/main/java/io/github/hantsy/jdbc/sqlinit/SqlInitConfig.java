@@ -5,7 +5,7 @@ import java.util.List;
 /**
  * Immutable configuration for SQL migration initialization.
  */
-public final class SqlInitConfig {
+public class SqlInitConfig {
 
     public static final String DEFAULT_SEPARATOR = ";";
     public static final String DEFAULT_HISTORY_TABLE = "sqlinit_migration";
@@ -15,6 +15,16 @@ public final class SqlInitConfig {
     private final String separator;
     private final String platform;
     private final String historyTable;
+
+    /**
+     * No-arg constructor required for CDI client proxies.
+     */
+    public SqlInitConfig() {
+        this.scriptLocations = List.of(DEFAULT_SCRIPT_LOCATION);
+        this.separator = DEFAULT_SEPARATOR;
+        this.platform = null;
+        this.historyTable = DEFAULT_HISTORY_TABLE;
+    }
 
     private SqlInitConfig(Builder builder) {
         this.scriptLocations = List.copyOf(builder.scriptLocations);

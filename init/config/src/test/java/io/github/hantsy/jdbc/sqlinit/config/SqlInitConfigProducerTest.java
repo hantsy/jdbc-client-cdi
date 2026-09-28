@@ -25,7 +25,8 @@ class SqlInitConfigProducerTest {
     void mapsConfigProperties() {
         assertNotNull(config);
         assertEquals("/", config.separator());
-        assertEquals(List.of("classpath*:/db/schema/**/*.sql"), config.schemaLocations());
-        assertEquals(List.of("/db/data-1.sql", "/db/data-2.sql"), config.dataLocations());
+        assertEquals(List.of("classpath:db/migration", "filesystem:/opt/sql"), config.scriptLocations());
+        assertEquals("h2", config.platform());
+        assertEquals("custom_migrations", config.historyTable());
     }
 }
