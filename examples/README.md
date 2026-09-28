@@ -6,15 +6,19 @@ workflow (one job per example).
 
 ## Overview
 
-| Example                  | Packaging | Modules + Database          | Demonstrates                                                                                                                    |
-|--------------------------|-----------|-----------------------------|---------------------------------------------------------------------------------------------------------------------------------|
-| [`vanilla`](vanilla)     | jar       | core, H2                    | The core `JdbcClient` with no CDI, backed by an in-memory H2 `DataSource`.                                                      |
-| [`javase`](javase)       | jar       | core/cdi, H2                | The core + CDI modules, bootstrapped with Weld SE from a `main()` method.                                                       |
-| [`servlet`](servlet)     | war       | core/cdi, MariaDB           | The core + CDI modules in a Servlet container (Tomcat 11), with the `DataSource` provided via JNDI from `META-INF/context.xml`. |
-| [`jakartaee`](jakartaee) | war       | core/cdi/config, PostgreSQL | The core + CDI modules behind a JAX-RS resource on GlassFish / WildFly, backed by PostgreSQL.                                   |
+| Example                  | Packaging | Modules + Database          | Demonstrates                                                                                                                                   |
+|--------------------------|-----------|-----------------------------|------------------------------------------------------------------------------------------------------------------------------------------------|
+| [`vanilla`](vanilla)     | jar       | core, H2                    | The core `JdbcClient` with no CDI, backed by an in-memory H2 `DataSource`.                                                                     |
+| [`javase`](javase)       | jar       | core/cdi/tx, H2             | The core + CDI + tx modules, bootstrapped with Weld SE from a `main()` method; resource-local `@Transactional`.                                 |
+| [`servlet`](servlet)     | war       | core/cdi/tx, MariaDB        | The core + CDI + tx modules in a Servlet container (Tomcat 11), with the `DataSource` provided via JNDI; resource-local `@Transactional`.       |
+| [`jakartaee`](jakartaee) | war       | core/cdi/config, PostgreSQL | The core + CDI modules behind a JAX-RS resource on GlassFish / WildFly, backed by PostgreSQL; container-managed JTA `@Transactional`.           |
 
 Each example keeps the same small CRUD story: get all, get by id, insert,
-update, and delete an `Engineer`.
+update, and delete an `Engineer`. The `javase`, `servlet`, and `jakartaee`
+examples wrap those operations in an `EngineerService` annotated with
+`@Transactional` — resource-local (via the `tx` module) in `javase`/`servlet`,
+and container-managed JTA (XA `DataSource`) in `jakartaee`. See
+[transactions](../docs/transactions.md) for details.
 
 ## Prerequisites
 

@@ -5,6 +5,7 @@ import org.jboss.arquillian.junit5.container.annotation.ArquillianTest;
 import org.jboss.arquillian.test.api.ArquillianResource;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.asset.EmptyAsset;
+import org.jboss.shrinkwrap.api.asset.StringAsset;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.junit.jupiter.api.Test;
 
@@ -32,8 +33,14 @@ public class EngineerServletIT {
                         DataSourceProducer.class,
                         DatabaseInitializer.class,
                         Engineer.class,
+                        EngineerService.class,
                         EngineerServlet.class
                 )
+                // The tx module's extension lives on the classpath but not in WEB-INF/lib, so
+                // register it via the bean-archive service file that Weld Servlet scans.
+                .addAsWebInfResource(
+                        new StringAsset("io.github.hantsy.jdbc.tx.cdi.TransactionalCdiExtension"),
+                        "classes/META-INF/services/jakarta.enterprise.inject.spi.Extension")
                 .addAsWebInfResource("test-web.xml", "web.xml")
                 .addAsWebInfResource(EmptyAsset.INSTANCE, "beans.xml")
                 .addAsManifestResource("test-context.xml", "context.xml");

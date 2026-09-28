@@ -1,30 +1,43 @@
 package io.github.hantsy.jdbc.examples.javase;
 
-import io.github.hantsy.jdbc.JdbcClient;
 import io.github.hantsy.jdbc.cdi.ConverterRegistryProducer;
 import io.github.hantsy.jdbc.cdi.JdbcClientProducer;
-import org.jboss.weld.junit5.auto.AddBeanClasses;
-import org.jboss.weld.junit5.auto.EnableAutoWeld;
+import io.github.hantsy.jdbc.tx.cdi.TransactionalCdiExtension;
+import io.github.hantsy.jdbc.tx.cdi.TransactionalInterceptor;
+import org.jboss.weld.junit5.WeldInitiator;
+import org.jboss.weld.junit5.WeldJunit5Extension;
+import org.jboss.weld.junit5.WeldSetup;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.util.List;
 import javax.sql.DataSource;
 import jakarta.inject.Inject;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
- * Exercises the CDI-produced {@link JdbcClient} with Weld's JUnit 5 extension, mirroring the
- * {@code cdi} module's own tests.
+ * Exercises the transactional {@link EngineerService} with Weld SE, mirroring the {@code tx}
+ * module's own integration-test wiring.
  */
-@EnableAutoWeld
-@AddBeanClasses({JdbcClientProducer.class, ConverterRegistryProducer.class, DataSourceProducer.class})
+@ExtendWith(WeldJunit5Extension.class)
 class JavaSeExampleTest {
 
+    @WeldSetup
+    public WeldInitiator weld = WeldInitiator.from(
+            JdbcClientProducer.class,
+            ConverterRegistryProducer.class,
+            DataSourceProducer.class,
+            EngineerService.class,
+            TransactionalInterceptor.class,
+            TransactionalCdiExtension.class
+    ).build();
+
     @Inject
-    JdbcClient client;
+    EngineerService service;
 
     @Inject
     DataSource dataSource;
@@ -39,28 +52,25 @@ class JavaSeExampleTest {
 
     @Test
     void crud() {
-        // insert
-        assertEquals(1, client.sql("INSERT INTO engineers (name) VALUES (:name)").param("name", "Ada").update());
+        long id = service.create("Ada");
 
-        // get all
-        List<Engineer> all = client.sql("SELECT id, name FROM engineers ORDER BY id").query(Engineer.class).list();
+        List<Engineer> all = service.findAll();
         assertEquals(1, all.size());
         assertEquals("Ada", all.get(0).name());
 
-        // get by id
-        Engineer ada = client.sql("SELECT id, name FROM engineers WHERE id = :id")
-                .param("id", all.get(0).id()).query(Engineer.class).single();
+        Engineer ada = service.findById(id);
         assertEquals("Ada", ada.name());
 
-        // update
-        client.sql("UPDATE engineers SET name = :name WHERE id = :id")
-                .param("name", "Ada Lovelace").param("id", ada.id()).update();
-        Engineer updated = client.sql("SELECT id, name FROM engineers WHERE id = :id")
-                .param("id", ada.id()).query(Engineer.class).single();
-        assertEquals("Ada Lovelace", updated.name());
+        service.update(id, "Ada Lovelace");
+        assertEquals("Ada Lovelace", service.findById(id).name());
 
-        // delete
-        client.sql("DELETE FROM engineers WHERE id = :id").param("id", ada.id()).update();
-        assertTrue(client.sql("SELECT id, name FROM engineers").query(Engineer.class).list().isEmpty());
+        service.delete(id);
+        assertTrue(service.findAll().isEmpty());
+    }
+
+    @Test
+    void rollsBackOnRuntimeException() {
+        assertThrows(IllegalStateException.class, () -> service.createTwo("Ada", ""));
+        assertTrue(service.findAll().isEmpty());
     }
 }
