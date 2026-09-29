@@ -103,7 +103,7 @@ public final class DbMigrator {
         for (Resource resource : resources) {
             Matcher matcher = MIGRATION_NAME.matcher(resource.getFilename());
             if (!matcher.matches()) {
-                LOGGER.warning(() -> "Ignoring SQL script that does not match V<version>__<description>.sql: "
+                LOGGER.warning(() -> "Ignoring resource that does not match V<version>__<description>.sql: "
                         + resource.getFilename());
                 continue;
             }

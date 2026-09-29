@@ -30,7 +30,7 @@ class ResourceResolverRegistryTest {
     @Test
     void resolvesAClasspathDirectoryRecursively() throws IOException {
         List<Resource> resources = registry.getResources("classpath:db/migration");
-        assertEquals(List.of("V1__create.sql", "V2__second.sql", "V3__third.sql"),
+        assertEquals(List.of("V1__create.sql", "V2__second.sql", "V3__third.sql", "readme.txt"),
                 resources.stream().map(Resource::getFilename).toList());
     }
 
@@ -48,8 +48,8 @@ class ResourceResolverRegistryTest {
     }
 
     @Test
-    void failsWhenALiteralClasspathFileIsMissing() {
-        assertThrows(IOException.class, () -> registry.getResources("classpath:db/nope.sql"));
+    void returnsEmptyWhenALiteralLocationIsMissing() throws IOException {
+        assertTrue(registry.getResources("classpath:db/nope.sql").isEmpty());
     }
 
     @Test
@@ -62,7 +62,7 @@ class ResourceResolverRegistryTest {
 
         List<Resource> resources = registry.getResources("filesystem:" + tempDir);
 
-        assertEquals(List.of("V1__a.sql", "V2__b.sql", "V3__c.sql"),
+        assertEquals(List.of("V1__a.sql", "V2__b.sql", "V3__c.sql", "notes.txt"),
                 resources.stream().map(Resource::getFilename).toList());
     }
 
@@ -83,7 +83,7 @@ class ResourceResolverRegistryTest {
             Thread.currentThread().setContextClassLoader(loader);
             try {
                 List<Resource> resources = new ResourceResolverRegistry().getResources("classpath:db/migration");
-                assertEquals(List.of("V1__create.sql", "V2__second.sql"),
+                assertEquals(List.of("V1__create.sql", "V2__second.sql", "readme.txt"),
                         resources.stream().map(Resource::getFilename).toList());
             } finally {
                 Thread.currentThread().setContextClassLoader(original);

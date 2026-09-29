@@ -1,6 +1,5 @@
 package io.github.hantsy.jdbc.sqlinit.resource;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -15,7 +14,7 @@ import java.util.stream.Stream;
  */
 public class FileSystemResourceResolver implements ResourceResolver {
 
-    private static final String SQL_GLOB = "**/*.sql";
+    private static final String ALL_FILES = "**/*";
 
     private final PathMatcher pathMatcher;
 
@@ -50,10 +49,7 @@ public class FileSystemResourceResolver implements ResourceResolver {
             return List.of(new FileSystemResource(file));
         }
         if (Files.isDirectory(file)) {
-            return scanFilesystem(file, SQL_GLOB);
-        }
-        if (normalized.endsWith(".sql")) {
-            throw new FileNotFoundException("Filesystem resource not found: " + path);
+            return scanFilesystem(file, ALL_FILES);
         }
         return List.of();
     }

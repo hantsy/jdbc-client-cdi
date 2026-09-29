@@ -1,6 +1,5 @@
 package io.github.hantsy.jdbc.sqlinit.resource;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.JarURLConnection;
@@ -25,7 +24,7 @@ import java.util.stream.Stream;
  */
 public class ClassPathResourceResolver implements ResourceResolver {
 
-    private static final String SQL_GLOB = "**/*.sql";
+    private static final String ALL_FILES = "**/*";
 
     private final ClassLoader classLoader;
     private final PathMatcher pathMatcher;
@@ -60,14 +59,30 @@ public class ClassPathResourceResolver implements ResourceResolver {
         if (pathMatcher.isPattern(path)) {
             return scanClasspath(path);
         }
-        if (path.endsWith(".sql")) {
-            URL url = classLoader.getResource(path);
-            if (url == null) {
-                throw new FileNotFoundException("Classpath resource not found: " + path);
-            }
+        URL url = classLoader.getResource(path);
+        if (url != null && isFile(url)) {
             return List.of(new ClassPathResource(path, classLoader));
         }
-        return scanClasspath(path + "/" + SQL_GLOB);
+        return scanClasspath(path + "/" + ALL_FILES);
+    }
+
+    private boolean isFile(URL url) {
+        try {
+            if ("file".equals(url.getProtocol())) {
+                return Files.isRegularFile(Paths.get(url.toURI()));
+            }
+            if ("jar".equals(url.getProtocol())) {
+                JarURLConnection connection = (JarURLConnection) url.openConnection();
+                connection.setUseCaches(false);
+                try (JarFile jarFile = connection.getJarFile()) {
+                    JarEntry entry = jarFile.getJarEntry(connection.getEntryName());
+                    return entry != null && !entry.isDirectory();
+                }
+            }
+        } catch (IOException | URISyntaxException e) {
+            return false;
+        }
+        return false;
     }
 
     private List<Resource> scanClasspath(String pattern) throws IOException {
