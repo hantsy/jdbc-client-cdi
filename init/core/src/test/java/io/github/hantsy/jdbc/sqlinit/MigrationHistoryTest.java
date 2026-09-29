@@ -27,14 +27,15 @@ class MigrationHistoryTest {
             assertTrue(history.applied().isEmpty());
 
             history.insertRunning(new Migration(1, "create", resource("V1__create.sql")));
-            assertEquals(Map.of(1, "running"), history.applied());
+            assertEquals(Map.of(1, MigrationHistory.Status.RUNNING), history.applied());
 
             history.markSucceeded(1);
-            assertEquals(Map.of(1, "succeeded"), history.applied());
+            assertEquals(Map.of(1, MigrationHistory.Status.SUCCEEDED), history.applied());
 
             history.insertRunning(new Migration(2, "seed", resource("V2__seed.sql")));
             history.markFailed(2, "boom");
-            assertEquals(Map.of(1, "succeeded", 2, "failed"), history.applied());
+            assertEquals(Map.of(1, MigrationHistory.Status.SUCCEEDED, 2, MigrationHistory.Status.FAILED),
+                    history.applied());
         }
     }
 

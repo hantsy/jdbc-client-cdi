@@ -71,7 +71,7 @@ public final class DbMigrator {
             MigrationHistory history = new MigrationHistory(connection, dbType(connection));
             history.ensureTable();
 
-            Map<Integer, String> applied = history.applied();
+            Map<Integer, MigrationHistory.Status> applied = history.applied();
             assertNoBrokenHistory(applied);
 
             int appliedCount = 0;
@@ -139,10 +139,10 @@ public final class DbMigrator {
                 connection.getMetaData().getURL());
     }
 
-    private void assertNoBrokenHistory(Map<Integer, String> applied) throws SQLException {
-        for (Map.Entry<Integer, String> entry : applied.entrySet()) {
-            if (!MigrationHistory.STATUS_SUCCEEDED.equals(entry.getValue())) {
-                throw new SQLException("Migration V" + entry.getKey() + " is in state '" + entry.getValue()
+    private void assertNoBrokenHistory(Map<Integer, MigrationHistory.Status> applied) throws SQLException {
+        for (Map.Entry<Integer, MigrationHistory.Status> entry : applied.entrySet()) {
+            if (MigrationHistory.Status.SUCCEEDED != entry.getValue()) {
+                throw new SQLException("Migration V" + entry.getKey() + " is in state '" + entry.getValue().value()
                         + "'; fix or remove the " + MigrationHistory.TABLE_NAME + " row before restarting");
             }
         }
