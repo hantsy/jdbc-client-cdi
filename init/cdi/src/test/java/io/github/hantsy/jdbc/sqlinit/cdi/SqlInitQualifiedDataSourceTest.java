@@ -13,8 +13,11 @@ import static io.github.hantsy.jdbc.sqlinit.cdi.TestDatabases.query;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @EnableAutoWeld
-@AddBeanClasses(PreferredDataSourceProducer.class)
+@AddBeanClasses({SqlInitBootstrapper.class, PreferredDataSourceProducer.class})
 class SqlInitQualifiedDataSourceTest {
+
+    @Inject
+    SqlInitBootstrapper bootstrapper;
 
     @Inject
     DataSource dataSource;
@@ -25,7 +28,7 @@ class SqlInitQualifiedDataSourceTest {
 
     @Test
     void prefersTheQualifiedDataSource() throws SQLException {
-        new SqlInitExtension().run();
+        bootstrapper.run();
 
         assertEquals(List.of("Ada", "Grace"), query(sqlInitDataSource, "SELECT name FROM engineers ORDER BY id"));
         assertEquals(List.of("0"), query(dataSource,

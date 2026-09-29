@@ -1,7 +1,6 @@
 package io.github.hantsy.jdbc.sqlinit.cdi;
 
 import org.jboss.weld.junit5.auto.AddBeanClasses;
-import org.jboss.weld.junit5.auto.AddExtensions;
 import org.jboss.weld.junit5.auto.EnableAutoWeld;
 import org.junit.jupiter.api.Test;
 
@@ -14,16 +13,11 @@ import static io.github.hantsy.jdbc.sqlinit.cdi.TestDatabases.query;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
- * Asserts the extension runs on the container's startup notification alone: nothing here calls
- * {@link SqlInitExtension#run()}.
- *
- * <p>{@code @AddExtensions} registers the extension with the Weld test harness, which does not scan
- * the classpath for {@code META-INF/services}. In a runtime the service file does that job, which is
- * what {@link SqlInitExtensionTest#isRegisteredAsAPortableExtension()} pins down.</p>
+ * Asserts the bootstrapper runs on the container's startup notification alone: nothing here calls
+ * {@link SqlInitBootstrapper#run()}.
  */
 @EnableAutoWeld
-@AddExtensions(SqlInitExtension.class)
-@AddBeanClasses(StartupDataSourceProducer.class)
+@AddBeanClasses({SqlInitBootstrapper.class, StartupDataSourceProducer.class})
 class SqlInitStartupTest {
 
     @Inject

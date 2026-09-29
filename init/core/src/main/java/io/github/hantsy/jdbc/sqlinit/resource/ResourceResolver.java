@@ -11,6 +11,14 @@ import java.util.List;
  */
 public interface ResourceResolver {
 
+    /**
+     * The protocol this resolver handles (without the trailing colon), or {@code null} when it is
+     * registered by other means (as the built-in {@code classpath:}/{@code file:} resolvers are).
+     */
+    default String protocol() {
+        return null;
+    }
+
     /** Resolves a literal location to a single resource, which may not exist. */
     Resource getResource(String location);
 

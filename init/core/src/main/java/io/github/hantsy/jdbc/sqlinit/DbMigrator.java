@@ -37,14 +37,20 @@ public final class DbMigrator {
 
     private final DataSource dataSource;
     private final SqlInitConfig config;
+    private final ResourceResolver resourceResolver;
 
     public DbMigrator(DataSource dataSource) {
-        this(dataSource, SqlInitConfig.defaults());
+        this(dataSource, SqlInitConfig.defaults(), new ResourceResolverRegistry());
     }
 
     public DbMigrator(DataSource dataSource, SqlInitConfig config) {
+        this(dataSource, config, new ResourceResolverRegistry());
+    }
+
+    public DbMigrator(DataSource dataSource, SqlInitConfig config, ResourceResolver resourceResolver) {
         this.dataSource = dataSource;
         this.config = config;
+        this.resourceResolver = resourceResolver;
     }
 
     /**
@@ -83,7 +89,7 @@ public final class DbMigrator {
     }
 
     private List<Migration> resolve() throws SQLException {
-        ResourceResolver resolver = new ResourceResolverRegistry();
+        ResourceResolver resolver = resourceResolver;
         Map<String, Resource> byFilename = new LinkedHashMap<>();
         for (String location : config.scriptLocations()) {
             List<Resource> found;

@@ -42,12 +42,12 @@ new DbMigrator(dataSource, config).migrate();
 
 ## Running at CDI startup
 
-The `cdi` artifact registers `SqlInitExtension` through
-`META-INF/services/jakarta.enterprise.inject.spi.Extension`. Adding the jar to the deployment is enough: the
-extension observes the CDI `Startup` event and runs the migrations. When an application declares several data
-sources, qualify the one that should be initialized with `@SqlInit`; otherwise the default unqualified
-`DataSource` bean is used. If neither exists, initialization is skipped with a warning. Any migration failure is
-rethrown as an `IllegalStateException`, which aborts startup.
+The `cdi` artifact ships `SqlInitBootstrapper`, a plain `@ApplicationScoped` bean that observes the CDI
+`Startup` event and runs the migrations; it is discovered through `META-INF/beans.xml`, so no portable-extension
+registration is needed. When an application declares several data sources, qualify the one that should be
+initialized with `@SqlInit`; otherwise the default unqualified `DataSource` bean is used. If neither exists,
+initialization is skipped with a warning. Any migration failure is rethrown as an `IllegalStateException`, which
+aborts startup.
 
 ## Migration files
 
@@ -76,6 +76,27 @@ jdbcclient.init.script-locations=classpath:db/migration,filesystem:/opt/sql/migr
 
 Scripts are read as UTF-8. Scanning inside an archive relies on that archive carrying directory entries for the
 scanned path, which is what the `jar` tool and the Maven and Gradle jar plugins produce.
+
+## Custom resource resolvers
+
+The registry maps a protocol prefix (`classpath:`, `file:`, `filesystem:`) to a `ResourceResolver`. To load
+migrations from another source, provide a `ResourceResolver` CDI bean and declare the protocol it handles:
+
+```java
+@ApplicationScoped
+public class S3ResourceResolver implements ResourceResolver {
+    @Override public String protocol() { return "s3"; }
+    @Override public Resource getResource(String location) { /* ... */ }
+    @Override public List<Resource> getResources(String pattern) throws IOException { /* ... */ }
+}
+```
+
+`SqlInitBootstrapper` registers every `ResourceResolver` bean with a non-null `protocol()`, so locations such as
+`s3://bucket/migrations` resolve through it alongside the built-in protocols:
+
+```properties
+jdbcclient.init.script-locations=classpath:db/migration,s3://bucket/migrations
+```
 
 ## Script format
 
