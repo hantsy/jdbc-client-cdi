@@ -20,67 +20,37 @@ import java.util.jar.JarFile;
 import java.util.stream.Stream;
 
 /**
- * Resolves location patterns by combining a {@link PathMatcher} with the classpath and file-system
- * loaders, scanning directories and jar/zip archives.
+ * Resolves locations against the classpath through a {@link ClassLoader}, scanning directories and
+ * jar/zip archives.
  */
-public class PathMatchingResourcePatternResolver implements ResourcePatternResolver {
+public class ClassPathResourceResolver implements ResourceResolver {
 
-    private static final String CLASSPATH_PREFIX = "classpath:";
-    private static final String FILE_PREFIX = "file:";
-    private static final String FILESYSTEM_PREFIX = "filesystem:";
     private static final String SQL_GLOB = "**/*.sql";
 
     private final ClassLoader classLoader;
     private final PathMatcher pathMatcher;
-    private final ClassPathResourceLoader classPathResourceLoader;
-    private final FileSystemResourceLoader fileSystemResourceLoader;
 
-    public PathMatchingResourcePatternResolver() {
+    public ClassPathResourceResolver() {
         this(ResourceUtils.defaultClassLoader());
     }
 
-    public PathMatchingResourcePatternResolver(ClassLoader classLoader) {
+    public ClassPathResourceResolver(ClassLoader classLoader) {
         this(classLoader, new AntPathMatcher());
     }
 
-    public PathMatchingResourcePatternResolver(ClassLoader classLoader, PathMatcher pathMatcher) {
+    public ClassPathResourceResolver(ClassLoader classLoader, PathMatcher pathMatcher) {
         this.classLoader = classLoader;
         this.pathMatcher = pathMatcher;
-        this.classPathResourceLoader = new ClassPathResourceLoader(classLoader);
-        this.fileSystemResourceLoader = new FileSystemResourceLoader();
-    }
-
-    @Override
-    public ClassLoader getClassLoader() {
-        return classLoader;
     }
 
     @Override
     public Resource getResource(String location) {
-        if (location.startsWith(FILESYSTEM_PREFIX)) {
-            return fileSystemResourceLoader.getResource(location.substring(FILESYSTEM_PREFIX.length()));
-        }
-        if (location.startsWith(FILE_PREFIX)) {
-            return fileSystemResourceLoader.getResource(location.substring(FILE_PREFIX.length()));
-        }
-        String classpath = location.startsWith(CLASSPATH_PREFIX)
-                ? location.substring(CLASSPATH_PREFIX.length())
-                : location;
-        return classPathResourceLoader.getResource(classpath);
+        return new ClassPathResource(ResourceUtils.stripLeadingSlash(location), classLoader);
     }
 
     @Override
-    public List<Resource> getResources(String locationPattern) throws IOException {
-        if (locationPattern.startsWith(FILESYSTEM_PREFIX)) {
-            return resolveFilesystem(locationPattern.substring(FILESYSTEM_PREFIX.length()));
-        }
-        if (locationPattern.startsWith(FILE_PREFIX)) {
-            return resolveFilesystem(locationPattern.substring(FILE_PREFIX.length()));
-        }
-        String classpath = locationPattern.startsWith(CLASSPATH_PREFIX)
-                ? locationPattern.substring(CLASSPATH_PREFIX.length())
-                : locationPattern;
-        return resolveClasspath(ResourceUtils.stripLeadingSlash(classpath));
+    public List<Resource> getResources(String pattern) throws IOException {
+        return resolveClasspath(ResourceUtils.stripLeadingSlash(pattern));
     }
 
     private List<Resource> resolveClasspath(String path) throws IOException {
@@ -164,56 +134,6 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
         }
     }
 
-    private List<Resource> resolveFilesystem(String path) throws IOException {
-        String normalized = path.replace('\\', '/');
-        if (normalized.isEmpty()) {
-            throw new IOException("Empty filesystem resource location");
-        }
-        Path file = Paths.get(normalized);
-        if (pathMatcher.isPattern(normalized)) {
-            return scanFilesystemPattern(normalized);
-        }
-        if (Files.isRegularFile(file)) {
-            return List.of(new FileSystemResource(file));
-        }
-        if (Files.isDirectory(file)) {
-            return scanFilesystem(file, SQL_GLOB);
-        }
-        if (normalized.endsWith(".sql")) {
-            throw new FileNotFoundException("Filesystem resource not found: " + path);
-        }
-        return List.of();
-    }
-
-    private List<Resource> scanFilesystemPattern(String pattern) throws IOException {
-        int rootEnd = wildcardRoot(pattern);
-        if (rootEnd == 0) {
-            return List.of();
-        }
-        String rootPath = pattern.substring(0, rootEnd);
-        Path root = Paths.get(rootPath);
-        if (!Files.isDirectory(root)) {
-            return List.of();
-        }
-        String entryPrefix = rootPath.endsWith("/") ? rootPath : rootPath + "/";
-        String relativePattern = pattern.startsWith(entryPrefix) ? pattern.substring(entryPrefix.length()) : pattern;
-        return scanFilesystem(root, relativePattern);
-    }
-
-    private List<Resource> scanFilesystem(Path root, String relativePattern) throws IOException {
-        List<Resource> resources = new ArrayList<>();
-        try (Stream<Path> paths = Files.walk(root)) {
-            paths.filter(Files::isRegularFile).forEach(file -> {
-                String relative = root.relativize(file).toString().replace('\\', '/');
-                if (pathMatcher.match(relativePattern, relative)) {
-                    resources.add(new FileSystemResource(file));
-                }
-            });
-        }
-        resources.sort(Comparator.comparing(Resource::getFilename));
-        return resources;
-    }
-
     private static URL toUrl(Path path) {
         try {
             return path.toUri().toURL();
@@ -222,7 +142,6 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
         }
     }
 
-    /** Returns the length of the leading wildcard-free part of a pattern, excluding its separator. */
     private int wildcardRoot(String pattern) {
         int start = 0;
         while (start < pattern.length()) {

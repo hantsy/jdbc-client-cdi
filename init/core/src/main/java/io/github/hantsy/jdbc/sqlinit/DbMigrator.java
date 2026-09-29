@@ -1,8 +1,8 @@
 package io.github.hantsy.jdbc.sqlinit;
 
-import io.github.hantsy.jdbc.sqlinit.resource.PathMatchingResourcePatternResolver;
 import io.github.hantsy.jdbc.sqlinit.resource.Resource;
-import io.github.hantsy.jdbc.sqlinit.resource.ResourcePatternResolver;
+import io.github.hantsy.jdbc.sqlinit.resource.ResourceResolver;
+import io.github.hantsy.jdbc.sqlinit.resource.ResourceResolverRegistry;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -83,7 +83,7 @@ public final class DbMigrator {
     }
 
     private List<Migration> resolve() throws SQLException {
-        ResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
+        ResourceResolver resolver = new ResourceResolverRegistry();
         Map<String, Resource> byFilename = new LinkedHashMap<>();
         for (String location : config.scriptLocations()) {
             List<Resource> found;
