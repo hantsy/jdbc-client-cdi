@@ -1,5 +1,8 @@
 package io.github.hantsy.jdbc.sqlinit;
 
+import io.github.hantsy.jdbc.sqlinit.resource.ClassPathResource;
+import io.github.hantsy.jdbc.sqlinit.resource.Resource;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -101,14 +104,15 @@ final class MigrationHistory {
     }
 
     private String loadInitSql() throws SQLException {
-        String resource = dbType.initSqlResource();
-        try (InputStream in = DbType.class.getClassLoader().getResourceAsStream(resource)) {
-            if (in == null) {
-                throw new SQLException("Missing sqlinit initialization resource: " + resource);
-            }
+        String name = dbType.initSqlResource();
+        Resource resource = new ClassPathResource(name, DbType.class.getClassLoader());
+        if (!resource.exists()) {
+            throw new SQLException("Missing sqlinit initialization resource: " + name);
+        }
+        try (InputStream in = resource.getInputStream()) {
             return new String(in.readAllBytes(), StandardCharsets.UTF_8);
         } catch (IOException e) {
-            throw new SQLException("Failed to read sqlinit initialization resource: " + resource, e);
+            throw new SQLException("Failed to read sqlinit initialization resource: " + name, e);
         }
     }
 }
