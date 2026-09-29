@@ -72,15 +72,22 @@ public final class DbMigrator {
             history.ensureTable();
 
             Map<Integer, MigrationHistory.Status> applied = history.applied();
-            assertNoBrokenHistory(applied);
+            int nextVersion = nextVersion(applied);
 
             int appliedCount = 0;
             for (Migration migration : migrations) {
-                if (applied.containsKey(migration.version())) {
+                MigrationHistory.Status status = applied.get(migration.version());
+                if (status == MigrationHistory.Status.SUCCEEDED) {
                     LOGGER.fine(() -> "Skipping already applied migration: " + migration.script());
                     continue;
                 }
-                runMigration(connection, history, migration);
+                if (migration.version() != nextVersion) {
+                    throw new SQLException("Expected migration V" + nextVersion + " but found V"
+                            + migration.version() + " (" + migration.script()
+                            + "); a migration is missing or out of order");
+                }
+                runMigration(connection, history, migration, status != null);
+                nextVersion++;
                 appliedCount++;
             }
             int count = appliedCount;
@@ -139,21 +146,26 @@ public final class DbMigrator {
                 connection.getMetaData().getURL());
     }
 
-    private void assertNoBrokenHistory(Map<Integer, MigrationHistory.Status> applied) throws SQLException {
+    private int nextVersion(Map<Integer, MigrationHistory.Status> applied) {
+        int next = 1;
         for (Map.Entry<Integer, MigrationHistory.Status> entry : applied.entrySet()) {
-            if (MigrationHistory.Status.SUCCEEDED != entry.getValue()) {
-                throw new SQLException("Migration V" + entry.getKey() + " is in state '" + entry.getValue().value()
-                        + "'; fix or remove the " + MigrationHistory.TABLE_NAME + " row before restarting");
+            if (entry.getValue() == MigrationHistory.Status.SUCCEEDED) {
+                next = Math.max(next, entry.getKey() + 1);
             }
         }
+        return next;
     }
 
-    private void runMigration(Connection connection, MigrationHistory history, Migration migration)
+    private void runMigration(Connection connection, MigrationHistory history, Migration migration, boolean retry)
             throws SQLException {
         LOGGER.info(() -> "Applying migration: " + migration.script());
 
         connection.setAutoCommit(true);
-        history.insertRunning(migration);
+        if (retry) {
+            history.markRunning(migration.version());
+        } else {
+            history.insertRunning(migration);
+        }
 
         connection.setAutoCommit(false);
         SQLException failure = null;

@@ -58,18 +58,47 @@ class DbMigratorTest {
     }
 
     @Test
-    void failsWhenALeftoverRunningRowExists() throws SQLException {
-        DataSource dataSource = h2("running");
+    void rerunsAFailedMigration() throws SQLException {
+        DataSource dataSource = h2("retry-failed");
+        try (Connection connection = dataSource.getConnection(); Statement statement = connection.createStatement()) {
+            statement.execute("CREATE TABLE db_migrations (version INT PRIMARY KEY, description VARCHAR(200), "
+                    + "script VARCHAR(500), status VARCHAR(16), installed_on TIMESTAMP, error_message VARCHAR(1000))");
+            statement.execute("INSERT INTO db_migrations (version, description, script, status, installed_on, error_message) "
+                    + "VALUES (1, 'create', 'V1__create.sql', 'failed', CURRENT_TIMESTAMP, 'boom')");
+        }
+
+        new DbMigrator(dataSource).migrate();
+
+        assertEquals(List.of("succeeded"), query(dataSource, "SELECT status FROM db_migrations WHERE version = 1"));
+        assertEquals(List.of("V2", "V3"), query(dataSource, "SELECT script FROM applied_scripts ORDER BY seq"));
+    }
+
+    @Test
+    void rerunsALeftoverRunningMigration() throws SQLException {
+        DataSource dataSource = h2("retry-running");
         try (Connection connection = dataSource.getConnection(); Statement statement = connection.createStatement()) {
             statement.execute("CREATE TABLE db_migrations (version INT PRIMARY KEY, description VARCHAR(200), "
                     + "script VARCHAR(500), status VARCHAR(16), installed_on TIMESTAMP, error_message VARCHAR(1000))");
             statement.execute("INSERT INTO db_migrations (version, description, script, status, installed_on) "
-                    + "VALUES (1, 'x', 'V1__x.sql', 'running', CURRENT_TIMESTAMP)");
+                    + "VALUES (1, 'create', 'V1__create.sql', 'running', CURRENT_TIMESTAMP)");
         }
 
-        SQLException e = assertThrows(SQLException.class, () -> new DbMigrator(dataSource).migrate());
+        new DbMigrator(dataSource).migrate();
 
-        assertTrue(e.getMessage().contains("running"));
+        assertEquals(List.of("succeeded"), query(dataSource, "SELECT status FROM db_migrations WHERE version = 1"));
+        assertEquals(List.of("V2", "V3"), query(dataSource, "SELECT script FROM applied_scripts ORDER BY seq"));
+    }
+
+    @Test
+    void failsWhenAMigrationVersionIsMissing() {
+        DataSource dataSource = h2("gap");
+        SqlInitConfig config = SqlInitConfig.builder()
+                .scriptLocations(List.of("classpath:db/gap"))
+                .build();
+
+        SQLException e = assertThrows(SQLException.class, () -> new DbMigrator(dataSource, config).migrate());
+
+        assertTrue(e.getMessage().contains("Expected migration"));
     }
 
     @Test

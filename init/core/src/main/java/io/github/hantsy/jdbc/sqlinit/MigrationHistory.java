@@ -94,6 +94,15 @@ final class MigrationHistory {
         }
     }
 
+    void markRunning(int version) throws SQLException {
+        try (PreparedStatement statement = connection.prepareStatement(
+                "UPDATE " + TABLE_NAME + " SET status = ?, error_message = NULL WHERE version = ?")) {
+            statement.setString(1, Status.RUNNING.value());
+            statement.setInt(2, version);
+            statement.executeUpdate();
+        }
+    }
+
     void markSucceeded(int version) throws SQLException {
         try (PreparedStatement statement = connection.prepareStatement(
                 "UPDATE " + TABLE_NAME + " SET status = ? WHERE version = ?")) {
