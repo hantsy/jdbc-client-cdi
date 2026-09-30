@@ -1,4 +1,4 @@
-site_name: "Fluent JDBC Client for Jakarta EE/CDI"
+site_name: "FluDa: Fluent Data Toolkit for Jakarta EE/CDI"
 site_description: "A lightweight, framework-agnostic fluent JDBC client for Jakarta EE and CDI applications."
 repo_url: https://github.com/hantsy/jdbc-client-cdi
 repo_name: hantsy/jdbc-client-cdi

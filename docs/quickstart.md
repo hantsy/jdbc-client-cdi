@@ -5,11 +5,11 @@ with strongly typed results.
 
 ## Creating `JdbcClient`
 
-After `jdbc-client-core` has been added to the project dependencies, a `JdbcClient` can be created directly from a
+After `fluda-jdbc-client-core` has been added to the project dependencies, a `JdbcClient` can be created directly from a
 `DataSource`:
 
 ```java
-import io.github.hantsy.jdbc.JdbcClient;
+import io.github.fludakit.jdbc.JdbcClient;
 
 import javax.sql.DataSource;
 
@@ -31,7 +31,7 @@ JdbcClient client = JdbcClient.builder(dataSource)
 
 See [configuration](configuration.md) for the full list of available defaults and options.
 
-In a Jakarta EE/CDI environment, CDI can create and inject the client. Add `jdbc-client-cdi` and `jdbc-client-config`,
+In a Jakarta EE/CDI environment, CDI can create and inject the client. Add `fluda-jdbc-client-cdi` and `fluda-jdbc-client-config`,
 then expose a `DataSource` as a bean:
 
 ```java

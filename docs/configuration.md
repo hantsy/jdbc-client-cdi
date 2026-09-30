@@ -32,7 +32,7 @@ JdbcClient client = JdbcClient.builder(dataSource)
 
 ## Declarative configuration in Jakarta EE/CDI
 
-In a Jakarta EE/CDI environment, the optional `jdbc-client-config` module can populate this configuration from
+In a Jakarta EE/CDI environment, the optional `fluda-jdbc-client-config` module can populate this configuration from
 MicroProfile Config properties.
 
 | Property                   | Default | Description                                                       |
