@@ -23,7 +23,7 @@
     
     
       
-        <title>Fluent JDBC Client for Jakarta EE/CDI</title>
+        <title>FluDa: Fluent Data Toolkit for Jakarta EE/CDI</title>
       
     
     
@@ -74,7 +74,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#fluent-jdbc-client-for-jakarta-eecdi" class="md-skip">
+        <a href="#fluda-fluent-data-toolkit-for-jakarta-eecdi" class="md-skip">
           Skip to content
         </a>
       
@@ -90,7 +90,7 @@
 
 <header class="md-header md-header--shadow" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="." title="Fluent JDBC Client for Jakarta EE/CDI" class="md-header__button md-logo" aria-label="Fluent JDBC Client for Jakarta EE/CDI" data-md-component="logo">
+    <a href="." title="FluDa: Fluent Data Toolkit for Jakarta EE/CDI" class="md-header__button md-logo" aria-label="FluDa: Fluent Data Toolkit for Jakarta EE/CDI" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
@@ -104,7 +104,7 @@
       <div class="md-header__ellipsis">
         <div class="md-header__topic">
           <span class="md-ellipsis">
-            Fluent JDBC Client for Jakarta EE/CDI
+            FluDa: Fluent Data Toolkit for Jakarta EE/CDI
           </span>
         </div>
         <div class="md-header__topic" data-md-component="header-topic">
@@ -228,13 +228,13 @@
 
 <nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="." title="Fluent JDBC Client for Jakarta EE/CDI" class="md-nav__button md-logo" aria-label="Fluent JDBC Client for Jakarta EE/CDI" data-md-component="logo">
+    <a href="." title="FluDa: Fluent Data Toolkit for Jakarta EE/CDI" class="md-nav__button md-logo" aria-label="FluDa: Fluent Data Toolkit for Jakarta EE/CDI" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
 
     </a>
-    Fluent JDBC Client for Jakarta EE/CDI
+    FluDa: Fluent Data Toolkit for Jakarta EE/CDI
   </label>
   
     <div class="md-nav__source">
@@ -525,8 +525,8 @@
   
 
 
-<h1 id="fluent-jdbc-client-for-jakarta-eecdi">Fluent JDBC Client for Jakarta EE/CDI<a class="headerlink" href="#fluent-jdbc-client-for-jakarta-eecdi" title="Permanent link">&para;</a></h1>
-<p>Fluent JDBC Client is a lightweight, framework-agnostic JDBC client for Jakarta EE and CDI applications. It provides the
+<h1 id="fluda-fluent-data-toolkit-for-jakarta-eecdi">FluDa: Fluent Data Toolkit for Jakarta EE/CDI<a class="headerlink" href="#fluda-fluent-data-toolkit-for-jakarta-eecdi" title="Permanent link">&para;</a></h1>
+<p>FluDa is a lightweight, framework-agnostic JDBC client for Jakarta EE and CDI applications. It provides the
 fluent developer experience of Spring's <code>JdbcClient</code> without introducing a Spring dependency.</p>
 <p>The project is organized into three core modules:</p>
 <table>
@@ -540,17 +540,17 @@ fluent developer experience of Spring's <code>JdbcClient</code> without introduc
 <tbody>
 <tr>
 <td><code>core</code></td>
-<td><code>jdbc-client-core</code></td>
+<td><code>fluda-jdbc-client-core</code></td>
 <td>Contains the plain <code>JdbcClient</code> API and helper types. It depends only on the JDK's <code>javax.sql.DataSource</code>.</td>
 </tr>
 <tr>
 <td><code>config</code></td>
-<td><code>jdbc-client-config</code></td>
+<td><code>fluda-jdbc-client-config</code></td>
 <td>Integrates with MicroProfile Config and exposes a configurable <code>JdbcConfig</code> bean.</td>
 </tr>
 <tr>
 <td><code>cdi</code></td>
-<td><code>jdbc-client-cdi</code></td>
+<td><code>fluda-jdbc-client-cdi</code></td>
 <td>Provides CDI producers for <code>JdbcClient</code> and the CDI-discovered <code>ConverterRegistry</code>.</td>
 </tr>
 </tbody>
@@ -586,7 +586,7 @@ reference for validating Jakarta EE/CDI applications in real runtimes.</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="September 26, 2026 11:17:05 UTC">September 26, 2026</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="September 30, 2026 00:32:15 UTC">September 30, 2026</span>
   </span>
 
     
