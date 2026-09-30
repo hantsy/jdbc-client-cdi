@@ -1,0 +1,149 @@
+package io.github.hantsy.jdbc.sqlinit;
+
+import io.github.hantsy.jdbc.sqlinit.resource.ClassPathResource;
+import io.github.hantsy.jdbc.sqlinit.resource.Resource;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.time.Instant;
+import java.util.LinkedHashMap;
+import java.util.Map;
+
+/**
+ * The {@code db_migrations} history table: its dialect-specific DDL and the bookkeeping statements that
+ * record a migration's lifecycle ({@code running} -> {@code succeeded}/{@code failed}).
+ *
+ * <p>Callers are expected to run these statements on a connection in auto-commit mode, so that the
+ * bookkeeping commits independently of the migration's own transaction.</p>
+ */
+final class MigrationHistory {
+
+    static final String TABLE_NAME = "db_migrations";
+
+    /** The lifecycle state of a recorded migration. */
+    enum Status {
+        RUNNING("running"),
+        SUCCEEDED("succeeded"),
+        FAILED("failed");
+
+        private final String value;
+
+        Status(String value) {
+            this.value = value;
+        }
+
+        String value() {
+            return value;
+        }
+
+        static Status from(String value) {
+            for (Status status : values()) {
+                if (status.value.equals(value)) {
+                    return status;
+                }
+            }
+            throw new IllegalArgumentException("Unknown migration status: " + value);
+        }
+    }
+
+    private final Connection connection;
+    private final DbType dbType;
+
+    MigrationHistory(Connection connection, DbType dbType) {
+        this.connection = connection;
+        this.dbType = dbType;
+    }
+
+    void ensureTable() throws SQLException {
+        if (!tableExists()) {
+            try (var statement = connection.createStatement()) {
+                statement.execute(loadInitSql());
+            }
+        }
+    }
+
+    Map<Integer, Status> applied() throws SQLException {
+        Map<Integer, Status> applied = new LinkedHashMap<>();
+        try (var statement = connection.createStatement();
+             ResultSet rows = statement.executeQuery(
+                     "SELECT version, status FROM " + TABLE_NAME + " ORDER BY version")) {
+            while (rows.next()) {
+                applied.put(rows.getInt(1), Status.from(rows.getString(2)));
+            }
+        }
+        return applied;
+    }
+
+    void insertRunning(Migration migration) throws SQLException {
+        try (PreparedStatement statement = connection.prepareStatement(
+                "INSERT INTO " + TABLE_NAME
+                        + " (version, description, script, status, installed_on) VALUES (?, ?, ?, ?, ?)")) {
+            statement.setInt(1, migration.version());
+            statement.setString(2, migration.description());
+            statement.setString(3, migration.script());
+            statement.setString(4, Status.RUNNING.value());
+            statement.setTimestamp(5, Timestamp.from(Instant.now()));
+            statement.executeUpdate();
+        }
+    }
+
+    void markRunning(int version) throws SQLException {
+        try (PreparedStatement statement = connection.prepareStatement(
+                "UPDATE " + TABLE_NAME + " SET status = ?, error_message = NULL WHERE version = ?")) {
+            statement.setString(1, Status.RUNNING.value());
+            statement.setInt(2, version);
+            statement.executeUpdate();
+        }
+    }
+
+    void markSucceeded(int version) throws SQLException {
+        try (PreparedStatement statement = connection.prepareStatement(
+                "UPDATE " + TABLE_NAME + " SET status = ? WHERE version = ?")) {
+            statement.setString(1, Status.SUCCEEDED.value());
+            statement.setInt(2, version);
+            statement.executeUpdate();
+        }
+    }
+
+    void markFailed(int version, String errorMessage) throws SQLException {
+        try (PreparedStatement statement = connection.prepareStatement(
+                "UPDATE " + TABLE_NAME + " SET status = ?, error_message = ? WHERE version = ?")) {
+            statement.setString(1, Status.FAILED.value());
+            statement.setString(2, errorMessage);
+            statement.setInt(3, version);
+            statement.executeUpdate();
+        }
+    }
+
+    private boolean tableExists() throws SQLException {
+        DatabaseMetaData meta = connection.getMetaData();
+        try (ResultSet tables = meta.getTables(null, null, "%", new String[]{"TABLE"})) {
+            while (tables.next()) {
+                if (TABLE_NAME.equalsIgnoreCase(tables.getString("TABLE_NAME"))) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private String loadInitSql() throws SQLException {
+        String name = dbType.initSqlResource();
+        Resource resource = new ClassPathResource(name, DbType.class.getClassLoader());
+        if (!resource.exists()) {
+            throw new SQLException("Missing sqlinit initialization resource: " + name);
+        }
+        try (InputStream in = resource.getInputStream()) {
+            return new String(in.readAllBytes(), StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            throw new SQLException("Failed to read sqlinit initialization resource: " + name, e);
+        }
+    }
+}

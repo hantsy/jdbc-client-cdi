@@ -37,6 +37,7 @@
     <modules>
         <module>jdbc-client</module>
         <module>examples</module>
+        <module>init</module>
     </modules>
 
     <properties>
@@ -93,6 +94,21 @@
             <dependency>
                 <groupId>io.github.fludakit</groupId>
                 <artifactId>fluda-jdbc-client-cdi</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.github.hantsy.jdbc</groupId>
+                <artifactId>jdbc-client-sql-init-core</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.github.hantsy.jdbc</groupId>
+                <artifactId>jdbc-client-sql-init-cdi</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.github.hantsy.jdbc</groupId>
+                <artifactId>jdbc-client-sql-init-config</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
