@@ -30,7 +30,7 @@
 
         <!-- Servlet container (Tomcat 11) and CDI (Weld 6) versions used by the examples. -->
         <tomcat.version>11.0.26</tomcat.version>
-        <weld.version>6.0.4.Final</weld.version>
+        <weld.version>7.0.0.Final</weld.version>
 
         <!-- Databases used by the examples. -->
         <mariadb.version>3.5.10</mariadb.version>
