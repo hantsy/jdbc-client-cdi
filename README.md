@@ -1,12 +1,16 @@
-# FluDa: Fluent Data Toolkit for Jakarta EE/CDI
+# Fluent JDBC Client for Jakarta EE/CDI
 
-FluDa(**Flu**ent **Da**ta Toolkit for Jakarta EE/CDI) is a lightweight, modular data-access suite designed specifically for standard Jakarta EE and CDI environments. It provides a developer-friendly, fluent programming model that mirrors modern data APIs without requiring full-blown Spring frameworks or introducing bulky, legacy dependencies. The toolkit is organized into three standalone, high-level core feature pillars:
+> **📣 This project is moving to the new [FluDa](https://github.com/fludakit) community.**
+> FluDa (**Flu**ent **Da**ta Toolkit for Jakarta EE/CDI) is the new home for this
+> code and the wider data-access toolkit built around it. Please follow
+> development, file issues, and contribute at
+> [github.com/fludakit](https://github.com/fludakit).
 
-* **JDBC Client**(`fluda-jdbc-client`): A lightweight, type-safe, fluent query engine built directly over JDBC.
-* **Resource Local Transaction Support** (`fluda-tx`): Container-agnostic declarative and programmatic transaction boundaries backed directly by a standard DataSource or JPA. (*coming soon*)
-* **SQL Initialization** (`fluda-sql-init`): Automates database schema management and data population on application startup. (*coming soon*)
+A lightweight, framework-agnostic fluent JDBC client for Jakarta EE and CDI
+applications. It mirrors the developer experience of Spring's `JdbcClient`
+without requiring Spring.
 
-The `jdbc-client` module is organized into three submodules:
+The project is organized into three modules:
 
 - `fluda-jdbc-client-core`: the core `JdbcClient` API and supporting types.
 - `fluda-jdbc-client-config`: optional MicroProfile Config integration.
