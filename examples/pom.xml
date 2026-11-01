@@ -29,7 +29,7 @@
         <maven.deploy.skip>true</maven.deploy.skip>
 
         <!-- Servlet container (Tomcat 11) and CDI (Weld 6) versions used by the examples. -->
-        <tomcat.version>11.0.26</tomcat.version>
+        <tomcat.version>11.0.27</tomcat.version>
         <weld.version>6.0.4.Final</weld.version>
 
         <!-- Databases used by the examples. -->
